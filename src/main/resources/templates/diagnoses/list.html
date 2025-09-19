@@ -1,62 +1,81 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::body})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnoses List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .modal-content { border-radius: 0.5rem; }
+        .diagnosis-list { margin-top: 20px; }
+        .nav-links { margin-bottom: 20px; }
+    </style>
+</head>
 <body>
-<div>
-    <h1 class="mb-3">Список диагнозов</h1>
+<!-- Navigation Links Block -->
+<div class="nav-links">
+    <h4>Навигация</h4>
+    <!-- Placeholder for future navigation links -->
+    <p>No navigation links available yet.</p>
+</div>
 
-    <!-- Кнопка вызова модалки -->
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createModal">
-        Создать новый диагноз
-    </button>
+<!-- Create Diagnosis Modal Trigger -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createDiagnosisModal">
+    Создать новый диагноз
+</button>
 
-    <!-- Bootstrap Modal -->
-    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form th:action="@{/diagnoses}" th:object="${newDiagnosis}" method="post">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createModalLabel">Новый диагноз</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Название</label>
-                            <input type="text" th:field="*{name}" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Влияние (impact)</label>
-                            <input type="text" th:field="*{impact}" class="form-control" placeholder="По умолчанию 1">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                        <button type="submit" class="btn btn-success">Сохранить</button>
-                    </div>
-                </form>
+<!-- Create Diagnosis Modal -->
+<div class="modal fade" id="createDiagnosisModal" tabindex="-1" aria-labelledby="createDiagnosisModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createDiagnosisModalLabel">Создать новый диагноз</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form th:action="@{/diagnoses}" th:object="${newDiagnosis}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Название диагноза</label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="impact" class="form-label">Влияние</label>
+                        <input type="text" class="form-control" id="impact" th:field="*{impact}" placeholder="Enter impact (default: 1)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Сохранить диагноз</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Таблица -->
+<!-- Diagnoses List -->
+<div class="diagnosis-list">
+    <h4>Все диагнозы</h4>
     <table class="table table-striped">
         <thead>
         <tr>
             <th>ID</th>
-            <th>Название</th>
+            <th>Name</th>
             <th>Impact</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="d : ${diagnoses}">
-            <td th:text="${d.id}"></td>
-            <td>
-                <a th:href="@{|/diagnoses/${d.id}|}" th:text="${d.name}"></a>
-            </td>
-            <td th:text="${d.impact}"></td>
+        <tr th:each="diagnosis : ${diagnoses}">
+            <td th:text="${diagnosis.id}"></td>
+            <td><a th:href="@{/diagnoses/{id}(id=${diagnosis.id})}" th:text="${diagnosis.name}"></a></td>
+            <td th:text="${diagnosis.impact}"></td>
+        </tr>
+        <tr th:if="${diagnoses.isEmpty()}">
+            <td colspan="3">Диагнозы не найдены.</td>
         </tr>
         </tbody>
     </table>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

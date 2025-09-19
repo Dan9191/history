@@ -30,6 +30,9 @@ public class DiagnosisController {
     // создание нового диагноза
     @PostMapping
     public String createDiagnosis(@ModelAttribute("newDiagnosis") Diagnosis diagnosis) {
+        if (diagnosis.getImpact() == null || diagnosis.getImpact().trim().isEmpty()) {
+            diagnosis.setImpact("1");
+        }
         diagnosisService.save(diagnosis);
         return "redirect:/diagnoses";
     }

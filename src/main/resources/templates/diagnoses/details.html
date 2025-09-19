@@ -1,19 +1,44 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::body})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnosis Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .nav-links { margin-bottom: 20px; }
+    </style>
+</head>
 <body>
-<div>
-    <h1>Диагноз</h1>
-    <div class="card p-3 mb-3">
-        <p><strong>ID:</strong> <span th:text="${diagnosis.id}"></span></p>
-        <p><strong>Название:</strong> <span th:text="${diagnosis.name}"></span></p>
-        <p><strong>Impact:</strong> <span th:text="${diagnosis.impact}"></span></p>
-    </div>
-
-    <h3>Пациенты с этим диагнозом</h3>
-    <p class="text-muted">Здесь позже будет список пациентов</p>
-
-    <a href="/diagnoses" class="btn btn-outline-primary mt-3">← Назад к списку</a>
+<!-- Navigation Links Block -->
+<div class="nav-links">
+    <h4>Navigation</h4>
+    <a href="/diagnoses" class="btn btn-outline-primary">Back to Diagnoses List</a>
 </div>
+
+<!-- Diagnosis Details -->
+<div class="diagnosis-details">
+    <h4>Diagnosis Details</h4>
+    <table class="table">
+        <tr>
+            <th>ID</th>
+            <td th:text="${diagnosis.id}"></td>
+        </tr>
+        <tr>
+            <th>Название</th>
+            <td th:text="${diagnosis.name}"></td>
+        </tr>
+        <tr>
+            <th>Влияние</th>
+            <td th:text="${diagnosis.impact}"></td>
+        </tr>
+        <tr>
+            <th>Пациенты</th>
+            <td>Patient list will be implemented later.</td>
+        </tr>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
