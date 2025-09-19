@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::body})}">
+<body>
+<div>
+    <h1 class="mb-3">Список диагнозов</h1>
+
+    <!-- Кнопка вызова модалки -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createModal">
+        Создать новый диагноз
+    </button>
+
+    <!-- Bootstrap Modal -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/diagnoses}" th:object="${newDiagnosis}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createModalLabel">Новый диагноз</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Название</label>
+                            <input type="text" th:field="*{name}" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Влияние (impact)</label>
+                            <input type="text" th:field="*{impact}" class="form-control" placeholder="По умолчанию 1">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Impact</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="d : ${diagnoses}">
+            <td th:text="${d.id}"></td>
+            <td>
+                <a th:href="@{|/diagnoses/${d.id}|}" th:text="${d.name}"></a>
+            </td>
+            <td th:text="${d.impact}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

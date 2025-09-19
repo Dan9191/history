@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::body})}">
+<body>
+<div>
+    <h1>Диагноз</h1>
+    <div class="card p-3 mb-3">
+        <p><strong>ID:</strong> <span th:text="${diagnosis.id}"></span></p>
+        <p><strong>Название:</strong> <span th:text="${diagnosis.name}"></span></p>
+        <p><strong>Impact:</strong> <span th:text="${diagnosis.impact}"></span></p>
+    </div>
+
+    <h3>Пациенты с этим диагнозом</h3>
+    <p class="text-muted">Здесь позже будет список пациентов</p>
+
+    <a href="/diagnoses" class="btn btn-outline-primary mt-3">← Назад к списку</a>
+</div>
+</body>
+</html>
