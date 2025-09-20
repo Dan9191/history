@@ -3,6 +3,10 @@ package dan.competition.history.service;
 import dan.competition.history.entity.MedicalData;
 import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.entity.Patient;
+import dan.competition.history.model.DiagnosisDTO;
+import dan.competition.history.model.MedicalDataBatchDTO;
+import dan.competition.history.model.MedicalDataDTO;
+import dan.competition.history.model.PatientDTO;
 import dan.competition.history.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +30,6 @@ public class PatientService {
 
     private final PatientRepository patientRepository;
 
-
     public List<Patient> findAll() {
         return patientRepository.findAll();
     }
@@ -35,11 +38,28 @@ public class PatientService {
         return patientRepository.findById(id);
     }
 
-    public Patient save(Patient patient) {
-        return patientRepository.save(patient);
+    public void save(Patient patient) {
+        patientRepository.save(patient);
     }
 
-    public Patient saveWithZipFile(Patient patient, MultipartFile zipFile) throws IOException {
+    public PatientDTO findByIdAsDTO(Long id) {
+        Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
+        List<DiagnosisDTO> diagnosisDTOs = patient.getDiagnoses().stream()
+                .map(d -> new DiagnosisDTO(d.getId(), d.getName(), d.getImpact()))
+                .toList();
+        List<MedicalDataBatchDTO> batchDTOs = patient.getMedicalDataBatches().stream()
+                .map(b -> new MedicalDataBatchDTO(
+                        b.getId(),
+                        b.getName(),
+                        b.getMedicalDataList().stream()
+                                .map(d -> new MedicalDataDTO(d.getId(), d.getTimeSec(), d.getUterus(), d.getBpm()))
+                                .toList()
+                ))
+                .toList();
+        return new PatientDTO(patient.getId(), diagnosisDTOs, batchDTOs);
+    }
+
+    public void saveWithZipFile(Patient patient, MultipartFile zipFile) throws IOException {
         // Группировка файлов по префиксу из ZIP-архива
         Map<String, Map<String, String>> groups = new HashMap<>();
         try (ZipInputStream zis = new ZipInputStream(zipFile.getInputStream())) {
@@ -106,7 +126,7 @@ public class PatientService {
         }
 
         // Сохранение пациента (каскадно сохранит батчи и данные)
-        return patientRepository.save(patient);
+        patientRepository.save(patient);
     }
 
     private String readZipEntry(ZipInputStream zis) throws IOException {
