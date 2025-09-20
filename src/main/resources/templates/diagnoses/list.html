@@ -1,30 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Diagnoses List</title>
+    <title>Список диагнозов</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { padding: 20px; }
         .modal-content { border-radius: 0.5rem; }
         .diagnosis-list { margin-top: 20px; }
         .nav-links { margin-bottom: 20px; }
+        .action-buttons { white-space: nowrap; }
     </style>
 </head>
 <body>
-<!-- Navigation Links Block -->
+<!-- Блок ссылок на другие страницы -->
 <div class="nav-links">
     <h4>Навигация</h4>
-    <!-- Placeholder for future navigation links -->
-    <p>No navigation links available yet.</p>
+    <a href="/patients" class="btn btn-outline-primary">Пациенты</a>
 </div>
 
-<!-- Create Diagnosis Modal Trigger -->
+<!-- Кнопка для создания диагноза -->
 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createDiagnosisModal">
-    Создать новый диагноз
+    Добавить новый диагноз
 </button>
 
-<!-- Create Diagnosis Modal -->
+<!-- Модальное окно для создания диагноза -->
 <div class="modal fade" id="createDiagnosisModal" tabindex="-1" aria-labelledby="createDiagnosisModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -39,12 +39,12 @@
                         <input type="text" class="form-control" id="name" th:field="*{name}" required>
                     </div>
                     <div class="mb-3">
-                        <label for="impact" class="form-label">Влияние</label>
-                        <input type="text" class="form-control" id="impact" th:field="*{impact}" placeholder="Enter impact (default: 1)">
+                        <label for="impact" class="form-label">Impact</label>
+                        <input type="text" class="form-control" id="impact" th:field="*{impact}" placeholder="Введите impact (по умолчанию: 1)">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                     <button type="submit" class="btn btn-primary">Сохранить диагноз</button>
                 </div>
             </form>
@@ -52,15 +52,16 @@
     </div>
 </div>
 
-<!-- Diagnoses List -->
+<!-- Список диагнозов -->
 <div class="diagnosis-list">
     <h4>Все диагнозы</h4>
     <table class="table table-striped">
         <thead>
         <tr>
             <th>ID</th>
-            <th>Name</th>
+            <th>Название</th>
             <th>Impact</th>
+            <th>Действия</th>
         </tr>
         </thead>
         <tbody>
@@ -68,9 +69,15 @@
             <td th:text="${diagnosis.id}"></td>
             <td><a th:href="@{/diagnoses/{id}(id=${diagnosis.id})}" th:text="${diagnosis.name}"></a></td>
             <td th:text="${diagnosis.impact}"></td>
+            <td class="action-buttons">
+                <a th:href="@{/diagnoses/{id}/edit(id=${diagnosis.id})}" class="btn btn-sm btn-warning">Редактировать</a>
+                <form th:action="@{/diagnoses/{id}/delete(id=${diagnosis.id})}" method="post" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить этот диагноз?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                </form>
+            </td>
         </tr>
         <tr th:if="${diagnoses.isEmpty()}">
-            <td colspan="3">Диагнозы не найдены.</td>
+            <td colspan="4">Диагнозы не найдены.</td>
         </tr>
         </tbody>
     </table>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать диагноз</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .nav-links { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<!-- Блок ссылок на другие страницы -->
+<div class="nav-links">
+    <h4>Навигация</h4>
+    <a href="/diagnoses" class="btn btn-outline-primary">Назад к списку диагнозов</a>
+    <a href="/patients" class="btn btn-outline-primary">Пациенты</a>
+</div>
+
+<!-- Форма редактирования диагноза -->
+<div class="edit-diagnosis">
+    <h4>Редактировать диагноз</h4>
+    <form th:action="@{/diagnoses/{id}(id=${diagnosis.id})}" th:object="${diagnosis}" method="post">
+        <div class="mb-3">
+            <label for="name" class="form-label">Название диагноза</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+        </div>
+        <div class="mb-3">
+            <label for="impact" class="form-label">Impact</label>
+            <input type="text" class="form-control" id="impact" th:field="*{impact}" placeholder="Введите impact (по умолчанию: 1)">
+        </div>
+        <div class="modal-footer">
+            <a href="/diagnoses" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

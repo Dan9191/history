@@ -22,10 +22,14 @@ public class DiagnosisService {
         return diagnosisRepository.findById(id);
     }
 
-    public Diagnosis save(Diagnosis diagnosis) {
+    public void save(Diagnosis diagnosis) {
         if (diagnosis.getImpact() == null || diagnosis.getImpact().trim().isEmpty()) {
             diagnosis.setImpact("1");
         }
-        return diagnosisRepository.save(diagnosis);
+        diagnosisRepository.save(diagnosis);
+    }
+
+    public void deleteById(Long id) {
+        diagnosisRepository.deleteById(id);
     }
 }

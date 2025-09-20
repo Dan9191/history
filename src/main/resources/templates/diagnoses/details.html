@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Diagnosis Details</title>
+    <title>Детали диагноза</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { padding: 20px; }
@@ -10,15 +10,16 @@
     </style>
 </head>
 <body>
-<!-- Navigation Links Block -->
+<!-- Блок ссылок на другие страницы -->
 <div class="nav-links">
-    <h4>Navigation</h4>
-    <a href="/diagnoses" class="btn btn-outline-primary">Back to Diagnoses List</a>
+    <h4>Навигация</h4>
+    <a href="/diagnoses" class="btn btn-outline-primary">Назад к списку диагнозов</a>
+    <a href="/patients" class="btn btn-outline-primary">Пациенты</a>
 </div>
 
-<!-- Diagnosis Details -->
+<!-- Детали диагноза -->
 <div class="diagnosis-details">
-    <h4>Diagnosis Details</h4>
+    <h4>Детали диагноза</h4>
     <table class="table">
         <tr>
             <th>ID</th>
@@ -29,12 +30,12 @@
             <td th:text="${diagnosis.name}"></td>
         </tr>
         <tr>
-            <th>Влияние</th>
+            <th>Impact</th>
             <td th:text="${diagnosis.impact}"></td>
         </tr>
         <tr>
             <th>Пациенты</th>
-            <td>Patient list will be implemented later.</td>
+            <td>Список пациентов будет реализован позже.</td>
         </tr>
     </table>
 </div>

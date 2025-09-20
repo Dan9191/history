@@ -42,7 +42,31 @@ public class DiagnosisController {
     public String viewDiagnosis(@PathVariable Long id, Model model) {
         Diagnosis diagnosis = diagnosisService.findById(id).orElseThrow(() -> new RuntimeException("Diagnosis not found"));
         model.addAttribute("diagnosis", diagnosis);
-        // пока без списка пациентов (будет позже)
         return "diagnoses/details";
+    }
+
+    // редактирование диагноза
+    @GetMapping("/{id}/edit")
+    public String editDiagnosis(@PathVariable Long id, Model model) {
+        Diagnosis diagnosis = diagnosisService.findById(id).orElseThrow(() -> new RuntimeException("Diagnosis not found"));
+        model.addAttribute("diagnosis", diagnosis);
+        return "diagnoses/edit";
+    }
+
+    // сохранение редактирования диагноза
+    @PostMapping("/{id}")
+    public String updateDiagnosis(@PathVariable Long id, @ModelAttribute("diagnosis") Diagnosis diagnosis) {
+        if (diagnosis.getImpact() == null || diagnosis.getImpact().trim().isEmpty()) {
+            diagnosis.setImpact("1");
+        }
+        diagnosisService.save(diagnosis);
+        return "redirect:/diagnoses";
+    }
+
+    // удаление диагноза
+    @PostMapping("/{id}/delete")
+    public String deleteDiagnosis(@PathVariable Long id) {
+        diagnosisService.deleteById(id);
+        return "redirect:/diagnoses";
     }
 }
