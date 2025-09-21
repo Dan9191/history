@@ -1,13 +1,15 @@
 package dan.competition.history.service;
 
+import dan.competition.history.entity.ChildbirthResult;
+import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.entity.MedicalData;
 import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.entity.Patient;
 import dan.competition.history.model.DiagnosisDTO;
-import dan.competition.history.model.MedicalDataBatchDTO;
-import dan.competition.history.model.MedicalDataDTO;
 import dan.competition.history.model.PatientDTO;
+import dan.competition.history.repository.MedicalDataBatchRepository;
 import dan.competition.history.repository.PatientRepository;
+import dan.competition.history.service.cache.ChildbirthResultCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +32,10 @@ public class PatientService {
 
     private final PatientRepository patientRepository;
 
+    private final MedicalDataBatchRepository medicalDataBatchRepository;
+
+    private final ChildbirthResultCacheService childbirthResultCacheService;
+
     public List<Patient> findAll() {
         return patientRepository.findAll();
     }
@@ -39,27 +45,43 @@ public class PatientService {
     }
 
     public void save(Patient patient) {
+        if (patient.getName() == null || patient.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Name is required");
+        }
         patientRepository.save(patient);
+    }
+
+    public void createPatient(PatientDTO patientDto) {
+        doCreatePatient(patientDto);
+    }
+
+    public Patient doCreatePatient(PatientDTO patientDto) {
+        ChildbirthResult childbirthResult = childbirthResultCacheService.findById(patientDto.getChildbirthResultEnum().getId());
+        List<Diagnosis> diagnoses = patientDto.getDiagnoses().stream().map(DiagnosisDTO::mapToDiagnosis).toList();
+        Patient patient = new Patient();
+        Optional.ofNullable(patientDto.getName()).ifPresent(patient::setName);
+        Optional.ofNullable(patientDto.getAge()).ifPresent(patient::setAge);
+        Optional.ofNullable(patientDto.getBe()).ifPresent(patient::setBe);
+        Optional.ofNullable(patientDto.getPh()).ifPresent(patient::setPh);
+        Optional.ofNullable(patientDto.getGlu()).ifPresent(patient::setGlu);
+        Optional.ofNullable(patientDto.getLac()).ifPresent(patient::setLac);
+        Optional.ofNullable(childbirthResult).ifPresent(patient::setChildbirthResult);
+        patient.setDiagnoses(diagnoses);
+        if (patient.getName() == null || patient.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+        patientRepository.save(patient);
+        return patient;
     }
 
     public PatientDTO findByIdAsDTO(Long id) {
         Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
-        List<DiagnosisDTO> diagnosisDTOs = patient.getDiagnoses().stream()
-                .map(d -> new DiagnosisDTO(d.getId(), d.getName(), d.getImpact()))
-                .toList();
-        List<MedicalDataBatchDTO> batchDTOs = patient.getMedicalDataBatches().stream()
-                .map(b -> new MedicalDataBatchDTO(
-                        b.getId(),
-                        b.getName(),
-                        b.getMedicalDataList().stream()
-                                .map(d -> new MedicalDataDTO(d.getId(), d.getTimeSec(), d.getUterus(), d.getBpm()))
-                                .toList()
-                ))
-                .toList();
-        return new PatientDTO(patient.getId(), diagnosisDTOs, batchDTOs);
+        return new PatientDTO(patient);
     }
 
-    public void saveWithZipFile(Patient patient, MultipartFile zipFile) throws IOException {
+    public void createPatientWithZipFile(PatientDTO patientDTO, MultipartFile zipFile) throws IOException {
+        Patient patient = doCreatePatient(patientDTO);
+
         // Группировка файлов по префиксу из ZIP-архива
         Map<String, Map<String, String>> groups = new HashMap<>();
         try (ZipInputStream zis = new ZipInputStream(zipFile.getInputStream())) {
@@ -91,6 +113,7 @@ public class PatientService {
             MedicalDataBatch batch = new MedicalDataBatch();
             batch.setName(prefix);
             batch.setPatient(patient);
+            medicalDataBatchRepository.save(batch);
             if (patient.getMedicalDataBatches() == null) {
                 patient.setMedicalDataBatches(new ArrayList<>());
             }

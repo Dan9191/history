@@ -29,6 +29,38 @@
             <td th:text="${patient.id}"></td>
         </tr>
         <tr>
+            <th>Имя</th>
+            <td th:text="${patient.name}"></td>
+        </tr>
+        <tr>
+            <th>Возраст</th>
+            <td th:text="${patient.age != null ? patient.age : 'N/A'}"></td>
+        </tr>
+        <tr>
+            <th>pH</th>
+            <td th:text="${patient.ph != null ? patient.ph : 'N/A'}"></td>
+        </tr>
+        <tr>
+            <th>CO2</th>
+            <td th:text="${patient.co2 != null ? patient.co2 : 'N/A'}"></td>
+        </tr>
+        <tr>
+            <th>Глюкоза</th>
+            <td th:text="${patient.glu != null ? patient.glu : 'N/A'}"></td>
+        </tr>
+        <tr>
+            <th>Лактат</th>
+            <td th:text="${patient.lac != null ? patient.lac : 'N/A'}"></td>
+        </tr>
+        <tr>
+            <th>BE</th>
+            <td th:text="${patient.be != null ? patient.be : 'N/A'}"></td>
+        </tr>
+        <tr>
+            <th>Результат родов</th>
+            <td th:text="${patient.childbirthResult.label}"></td>
+        </tr>
+        <tr>
             <th>Диагнозы</th>
             <td>
                 <ul>
@@ -49,6 +81,7 @@
             </td>
         </tr>
     </table>
+    <a th:href="@{/patients/{id}/edit(id=${patient.id})}" class="btn btn-warning">Редактировать пациента</a>
 </div>
 
 <script th:inline="javascript">

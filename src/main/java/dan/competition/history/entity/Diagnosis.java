@@ -19,6 +19,7 @@ public class Diagnosis {
     private Long id;
 
     private String name;
+    private String description;
     private String impact;
 
     @ManyToMany(mappedBy = "diagnoses")

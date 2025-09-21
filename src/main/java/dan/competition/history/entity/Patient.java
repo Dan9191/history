@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -21,6 +22,39 @@ public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String name;
+
+    private Integer age;
+
+    /**
+     * Кислотно-щелочной баланс.
+     */
+    private Float ph;
+
+    /**
+     * Давление углекислого газа, растворенного в артериальной крови.
+     */
+    private Float co2;
+
+    /**
+     * Уровень сахара в крови.
+     */
+    private Float glu;
+
+    /**
+     * Продукт анаэробного (бескислородного) метаболизма глюкозы.
+     */
+    private Float lac;
+
+    /**
+     * Показатель метаболического компонента регуляции pH.
+     */
+    private Float be;
+
+    @ManyToOne
+    @JoinColumn(name = "childbirth_result_id", nullable = false)
+    private ChildbirthResult childbirthResult;
 
     @ManyToMany
     @JoinTable(

@@ -26,8 +26,12 @@
             <input type="text" class="form-control" id="name" th:field="*{name}" required>
         </div>
         <div class="mb-3">
-            <label for="impact" class="form-label">Impact</label>
-            <input type="text" class="form-control" id="impact" th:field="*{impact}" placeholder="Введите impact (по умолчанию: 1)">
+            <label for="impact" class="form-label">Влияние</label>
+            <input type="text" class="form-control" id="impact" th:field="*{impact}" placeholder="Введите формулу влияния (по умолчанию: 1)">
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Описание</label>
+            <input type="text" class="form-control" id="description" th:field="*{description}" required>
         </div>
         <div class="modal-footer">
             <a href="/diagnoses" class="btn btn-secondary">Отмена</a>

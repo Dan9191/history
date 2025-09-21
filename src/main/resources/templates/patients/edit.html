@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать пациента</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .nav-links { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<!-- Блок ссылок на другие страницы -->
+<div class="nav-links">
+    <h4>Навигация</h4>
+    <a href="/patients" class="btn btn-outline-primary">Назад к списку пациентов</a>
+    <a href="/diagnoses" class="btn btn-outline-primary">Диагнозы</a>
+</div>
+
+<!-- Форма редактирования пациента -->
+<div class="edit-patient">
+    <h4>Редактировать пациента</h4>
+    <form th:action="@{/patients/{id}(id=${patient.id})}" th:object="${patient}" method="post">
+        <div class="mb-3">
+            <label for="name" class="form-label">Имя пациента *</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+        </div>
+        <div class="mb-3">
+            <label for="age" class="form-label">Возраст</label>
+            <input type="number" class="form-control" id="age" th:field="*{age}">
+        </div>
+        <div class="mb-3">
+            <label for="ph" class="form-label">pH</label>
+            <input type="number" step="0.01" class="form-control" id="ph" th:field="*{ph}">
+        </div>
+        <div class="mb-3">
+            <label for="co2" class="form-label">CO2</label>
+            <input type="number" step="0.01" class="form-control" id="co2" th:field="*{co2}">
+        </div>
+        <div class="mb-3">
+            <label for="glu" class="form-label">Глюкоза</label>
+            <input type="number" step="0.01" class="form-control" id="glu" th:field="*{glu}">
+        </div>
+        <div class="mb-3">
+            <label for="lac" class="form-label">Лактат</label>
+            <input type="number" step="0.01" class="form-control" id="lac" th:field="*{lac}">
+        </div>
+        <div class="mb-3">
+            <label for="be" class="form-label">BE</label>
+            <input type="number" step="0.01" class="form-control" id="be" th:field="*{be}">
+        </div>
+        <div class="mb-3">
+            <label for="childbirthResult" class="form-label">Результат родов *</label>
+            <select class="form-select" id="childbirthResult" th:field="*{childbirthResult.id}" required>
+                <option th:each="result : ${T(dan.competition.history.model.ChildbirthResultEnum).values()}"
+                        th:value="${result.id}"
+                        th:text="${result.label}"></option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Диагнозы</label>
+            <div th:each="diagnosis : ${diagnoses}">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" th:field="*{diagnoses}" th:value="${diagnosis.id}" />
+                    <label class="form-check-label" th:for="${#ids.prev('diagnoses')}" th:text="${diagnosis.name}"></label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="/patients" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

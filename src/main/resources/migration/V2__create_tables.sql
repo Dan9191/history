@@ -1,26 +1,59 @@
 SET search_path TO patients_history;
 
+-- Таблица результатов родов
+CREATE TABLE IF NOT EXISTS childbirth_results (
+                                                  id INT PRIMARY KEY,
+                                                  name VARCHAR(100) NOT NULL
+    );
+COMMENT ON TABLE childbirth_results IS 'Справочник результатов родов';
+COMMENT ON COLUMN childbirth_results.id IS 'Идентификатор результата';
+COMMENT ON COLUMN childbirth_results.name IS 'Название результата (Regular или Hypoxia)';
+
+
+INSERT INTO childbirth_results (id, name) SELECT 1, 'Regular'
+    WHERE NOT EXISTS (SELECT 1 FROM childbirth_results WHERE id = 1);
+INSERT INTO childbirth_results (id, name) SELECT 2, 'Hypoxia'
+    WHERE NOT EXISTS (SELECT 1 FROM childbirth_results WHERE id = 2);
+
+
 -- Таблица пациентов
 CREATE TABLE IF NOT EXISTS patients (
-    id BIGSERIAL PRIMARY KEY
-);
-
-COMMENT ON TABLE patients IS 'Таблица пациентов';
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    age INT,
+    ph FLOAT,
+    co2 FLOAT,
+    glu FLOAT,
+    lac FLOAT,
+    be FLOAT,
+    childbirth_result_id INT NOT NULL REFERENCES childbirth_results(id)
+    );
+COMMENT ON TABLE patients IS 'Таблица для хранения информации о пациентах';
 COMMENT ON COLUMN patients.id IS 'Идентификатор пациента';
+COMMENT ON COLUMN patients.name IS 'Имя пациента';
+COMMENT ON COLUMN patients.age IS 'Возраст пациента';
+COMMENT ON COLUMN patients.ph IS 'Кислотно-щелочной баланс';
+COMMENT ON COLUMN patients.co2 IS 'Давление CO2 в артериальной крови';
+COMMENT ON COLUMN patients.glu IS 'Уровень сахара в крови';
+COMMENT ON COLUMN patients.lac IS 'Уровень молочной кислоты (лактат)';
+COMMENT ON COLUMN patients.be IS 'Метаболический компонент регуляции pH';
+COMMENT ON COLUMN patients.childbirth_result_id IS 'Ссылка на результат родов';
 
 -- Таблица диагнозов
 CREATE TABLE IF NOT EXISTS diagnoses (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     impact VARCHAR(500)
     );
 
 COMMENT ON TABLE diagnoses IS 'Таблица диагнозов';
 COMMENT ON COLUMN diagnoses.id IS 'Идентификатор диагноза';
 COMMENT ON COLUMN diagnoses.name IS 'Название диагноза';
+COMMENT ON COLUMN diagnoses.description IS 'Описание диагноза';
 COMMENT ON COLUMN diagnoses.impact IS 'Влияние диагноза на самочувствие';
 
--- Таблица связей пациент ↔ диагноз (многие-ко-многим)
+-- Таблица связей пациент - диагноз (многие-ко-многим)
 CREATE TABLE IF NOT EXISTS patient_diagnoses (
     patient_id BIGINT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
     diagnosis_id BIGINT NOT NULL REFERENCES diagnoses(id) ON DELETE CASCADE,
