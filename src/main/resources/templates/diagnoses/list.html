@@ -4,62 +4,54 @@
     <meta charset="UTF-8">
     <title>Список диагнозов</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { padding: 20px; }
-        .modal-content { border-radius: 0.5rem; }
-        .diagnosis-list { margin-top: 20px; }
-        .nav-links { margin-bottom: 20px; }
-        .action-buttons { white-space: nowrap; }
-    </style>
+    <link href="/css/styles.css" rel="stylesheet">
 </head>
 <body>
-<!-- Блок ссылок на другие страницы -->
+<!-- Навигация -->
 <div class="nav-links">
     <h4>Навигация</h4>
     <a href="/patients" class="btn btn-outline-primary">Пациенты</a>
 </div>
 
-<!-- Кнопка для создания диагноза -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createDiagnosisModal">
-    Добавить новый диагноз
-</button>
+<!-- Кнопка для сворачиваемого блока -->
+<div class="diagnosis-form">
+    <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#diagnosisFormCollapse" aria-expanded="false" aria-controls="diagnosisFormCollapse">
+        Добавить новый диагноз
+    </button>
+</div>
 
-<!-- Модальное окно для создания диагноза -->
-<div class="modal fade" id="createDiagnosisModal" tabindex="-1" aria-labelledby="createDiagnosisModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createDiagnosisModalLabel">Создать новый диагноз</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Сворачиваемый блок с формой -->
+<div class="collapse" id="diagnosisFormCollapse">
+    <div class="card card-body">
+        <h4>Создать новый диагноз</h4>
+        <form id="diagnosisForm">
+            <div class="mb-3">
+                <label for="name" class="form-label">Название диагноза *</label>
+                <input type="text" class="form-control" id="name" name="name" required>
             </div>
-            <form th:action="@{/diagnoses}" th:object="${newDiagnosis}" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Название диагноза</label>
-                        <input type="text" class="form-control" id="name" th:field="*{name}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Описание диагноза</label>
-                        <input type="text" class="form-control" id="description" th:field="*{description}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="impact" class="form-label">Impact</label>
-                        <input type="text" class="form-control" id="impact" th:field="*{impact}" placeholder="Введите impact (по умолчанию: 1)">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                    <button type="submit" class="btn btn-primary">Сохранить диагноз</button>
-                </div>
-            </form>
-        </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание диагноза</label>
+                <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="impact" class="form-label">Impact</label>
+                <input type="text" class="form-control" id="impact" name="impact">
+            </div>
+            <div class="mb-3">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#diagnosisFormCollapse">Закрыть</button>
+                <button type="submit" class="btn btn-primary">Сохранить диагноз</button>
+            </div>
+            <div id="errorMessage" class="error"></div>
+            <div id="successMessage" class="success"></div>
+        </form>
     </div>
 </div>
 
-<!-- Список диагнозов -->
-<div class="diagnosis-list">
+<!-- Таблица диагнозов -->
+<!--/*@thymesVar id="diagnosis" type="dan.competition.history.dto.DiagnosisDTO"*/-->
+<div class="diagnoses-table">
     <h4>Все диагнозы</h4>
-    <table class="table table-striped">
+    <table class="table">
         <thead>
         <tr>
             <th>ID</th>
@@ -71,16 +63,14 @@
         <tbody>
         <tr th:each="diagnosis : ${diagnoses}">
             <td th:text="${diagnosis.id}"></td>
-            <td><a th:href="@{/diagnoses/{id}(id=${diagnosis.id})}" th:text="${diagnosis.name}"></a></td>
+            <td th:text="${diagnosis.name}"></td>
             <td th:text="${diagnosis.impact}"></td>
-            <td class="action-buttons">
+            <td>
                 <a th:href="@{/diagnoses/{id}/edit(id=${diagnosis.id})}" class="btn btn-sm btn-warning">Редактировать</a>
-                <form th:action="@{/diagnoses/{id}/delete(id=${diagnosis.id})}" method="post" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить этот диагноз?')">
-                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
-                </form>
+                <button class="btn btn-sm btn-danger delete-diagnosis" th:data-diagnosis-id="${diagnosis.id}">Удалить</button>
             </td>
         </tr>
-        <tr th:if="${diagnoses.isEmpty()}">
+        <tr th:if="${#lists.isEmpty(diagnoses)}">
             <td colspan="4">Диагнозы не найдены.</td>
         </tr>
         </tbody>
@@ -88,5 +78,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/diagnoses.js"></script>
 </body>
 </html>
