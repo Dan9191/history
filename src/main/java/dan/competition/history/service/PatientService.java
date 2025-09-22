@@ -8,6 +8,7 @@ import dan.competition.history.entity.Patient;
 import dan.competition.history.model.PatientCreateDTO;
 import dan.competition.history.model.PatientViewDTO;
 import dan.competition.history.repository.MedicalDataBatchRepository;
+import dan.competition.history.repository.MedicalDataRepository;
 import dan.competition.history.repository.PatientRepository;
 import dan.competition.history.service.cache.ChildbirthResultCacheService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ public class PatientService {
     private final PatientRepository patientRepository;
 
     private final MedicalDataBatchRepository medicalDataBatchRepository;
+
+    private final MedicalDataRepository medicalDataRepository;
 
     private final DiagnosisService diagnosisService;
 
@@ -178,8 +181,8 @@ public class PatientService {
             batch.setMedicalDataList(dataList);
         }
 
-        // Сохранение пациента (каскадно сохранит батчи и данные)
-        patientRepository.save(patient);
+        patient.getMedicalDataBatches().
+                forEach(batch -> medicalDataRepository.saveBatch(batch.getMedicalDataList(), batch.getId()));
 
         log.info("finished to createPatientWithZipFile");
     }

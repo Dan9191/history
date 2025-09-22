@@ -4,111 +4,83 @@
     <meta charset="UTF-8">
     <title>Список пациентов</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { padding: 20px; }
-        .modal-content { border-radius: 0.5rem; }
-        .patient-list { margin-top: 20px; }
-        .nav-links { margin-bottom: 20px; }
-        .error { color: red; }
-    </style>
+    <link href="/css/styles.css" rel="stylesheet">
 </head>
 <body>
-<!-- Блок ссылок на другие страницы -->
+<!-- Навигация -->
 <div class="nav-links">
     <h4>Навигация</h4>
     <a href="/diagnoses" class="btn btn-outline-primary">Диагнозы</a>
 </div>
 
-<!-- Кнопка для создания пациента -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPatientModal">
-    Добавить нового пациента
-</button>
-
-<!-- Модальное окно для создания пациента -->
-<div class="modal fade" id="createPatientModal" tabindex="-1" aria-labelledby="createPatientModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createPatientModalLabel">Создать нового пациента</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form th:action="@{/patients}" th:object="${newPatient}" method="post" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div th:if="${#fields.hasErrors('global')}" class="alert alert-danger">
-                        <p th:each="err : ${#fields.errors('global')}" th:text="${err}"></p>
-                    </div>
-                    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Имя пациента *</label>
-                        <input type="text" class="form-control" id="name" th:field="*{name}" required>
-                        <span th:if="${#fields.hasErrors('name')}" class="error" th:errors="*{name}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="age" class="form-label">Возраст</label>
-                        <input type="number" class="form-control" id="age" th:field="*{age}">
-                        <span th:if="${#fields.hasErrors('age')}" class="error" th:errors="*{age}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="ph" class="form-label">pH</label>
-                        <input type="number" step="0.01" class="form-control" id="ph" th:field="*{ph}">
-                        <span th:if="${#fields.hasErrors('ph')}" class="error" th:errors="*{ph}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="co2" class="form-label">CO2</label>
-                        <input type="number" step="0.01" class="form-control" id="co2" th:field="*{co2}">
-                        <span th:if="${#fields.hasErrors('co2')}" class="error" th:errors="*{co2}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="glu" class="form-label">Глюкоза</label>
-                        <input type="number" step="0.01" class="form-control" id="glu" th:field="*{glu}">
-                        <span th:if="${#fields.hasErrors('glu')}" class="error" th:errors="*{glu}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="lac" class="form-label">Лактат</label>
-                        <input type="number" step="0.01" class="form-control" id="lac" th:field="*{lac}">
-                        <span th:if="${#fields.hasErrors('lac')}" class="error" th:errors="*{lac}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="be" class="form-label">BE</label>
-                        <input type="number" step="0.01" class="form-control" id="be" th:field="*{be}">
-                        <span th:if="${#fields.hasErrors('be')}" class="error" th:errors="*{be}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="childbirthResultId" class="form-label">Результат родов *</label>
-                        <select class="form-select" id="childbirthResultId" th:field="*{childbirthResultId}" required>
-                            <option value="" disabled selected>Выберите результат</option>
-                            <option th:each="result : ${T(dan.competition.history.model.ChildbirthResultEnum).values()}"
-                                    th:value="${result.id}"
-                                    th:text="${result.label}"></option>
-                        </select>
-                        <span th:if="${#fields.hasErrors('childbirthResultId')}" class="error" th:errors="*{childbirthResultId}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Диагнозы *</label>
-                        <div th:each="diagnosis : ${diagnoses}">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" th:field="*{diagnosesIds}" th:value="${diagnosis.id}" />
-                                <label class="form-check-label" th:for="${#ids.prev('diagnosesIds')}" th:text="${diagnosis.name}"></label>
-                            </div>
-                        </div>
-                        <span th:if="${#fields.hasErrors('diagnosesIds')}" class="error" th:errors="*{diagnosesIds}"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="zipFile" class="form-label">ZIP-архив с медицинскими данными</label>
-                        <input type="file" class="form-control" id="zipFile" name="zipFile" accept=".zip">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                    <button type="submit" class="btn btn-primary">Сохранить пациента</button>
-                </div>
-            </form>
+<!-- Форма создания пациента -->
+<div class="patient-form">
+    <h4>Добавить нового пациента</h4>
+    <form id="patientForm" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="name" class="form-label">Имя пациента *</label>
+            <input type="text" class="form-control" id="name" name="name" required>
         </div>
+        <div class="mb-3">
+            <label for="age" class="form-label">Возраст</label>
+            <input type="number" class="form-control" id="age" name="age">
+        </div>
+        <div class="mb-3">
+            <label for="ph" class="form-label">pH</label>
+            <input type="number" step="0.01" class="form-control" id="ph" name="ph">
+        </div>
+        <div class="mb-3">
+            <label for="co2" class="form-label">CO2</label>
+            <input type="number" step="0.01" class="form-control" id="co2" name="co2">
+        </div>
+        <div class="mb-3">
+            <label for="glu" class="form-label">Глюкоза</label>
+            <input type="number" step="0.01" class="form-control" id="glu" name="glu">
+        </div>
+        <div class="mb-3">
+            <label for="lac" class="form-label">Лактат</label>
+            <input type="number" step="0.01" class="form-control" id="lac" name="lac">
+        </div>
+        <div class="mb-3">
+            <label for="be" class="form-label">BE</label>
+            <input type="number" step="0.01" class="form-control" id="be" name="be">
+        </div>
+        <div class="mb-3">
+            <label for="childbirthResultId" class="form-label">Результат родов *</label>
+            <select class="form-control" id="childbirthResultId" name="childbirthResultId" required>
+                <option value="" disabled selected>Выберите результат</option>
+                <option th:each="result : ${T(dan.competition.history.model.ChildbirthResultEnum).values()}"
+                        th:value="${result.id}" th:text="${result.label}"></option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="diagnosesIds" class="form-label">Диагнозы *</label>
+            <select multiple class="form-control" id="diagnosesIds" name="diagnosesIds" required>
+                <option th:each="diagnosis : ${diagnoses}" th:value="${diagnosis.id}" th:text="${diagnosis.name}"></option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="zipFile" class="form-label">ZIP-архив с медицинскими данными</label>
+            <input type="file" class="form-control" id="zipFile" name="zipFile" accept=".zip">
+        </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            <button type="submit" class="btn btn-primary">Сохранить пациента</button>
+        </div>
+        <div id="errorMessage" class="error"></div>
+        <div id="successMessage" class="success"></div>
+    </form>
+</div>
+
+<!-- Спиннер -->
+<div id="spinnerOverlay" class="spinner-overlay">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Загрузка...</span>
     </div>
 </div>
 
-<!-- Список пациентов -->
-<div class="patient-list">
+<!-- Таблица пациентов -->
+<div class="patients-table">
     <h4>Все пациенты</h4>
     <table class="table table-striped">
         <thead>
@@ -122,15 +94,35 @@
         </thead>
         <tbody>
         <tr th:each="patient : ${patients}">
-            <td><a th:href="@{/patients/{id}(id=${patient.id})}" th:text="${patient.id}"></a></td>
+            <td th:text="${patient.id}"></td>
             <td th:text="${patient.name}"></td>
-            <td th:text="${#lists.size(patient.diagnoses)} + ' диагнозов'"></td>
-            <td th:text="${#lists.size(patient.medicalDataBatches)} + ' батчей'"></td>
+            <td>
+                        <span th:if="${patient.diagnoses != null and not #lists.isEmpty(patient.diagnoses)}">
+                            <span th:each="diagnosis, iterStat : ${patient.diagnoses}">
+                                <span th:text="${diagnosis.name}"></span>
+                                <span th:if="${!iterStat.last}">,</span>
+                            </span>
+                        </span>
+                <span th:if="${patient.diagnoses == null or #lists.isEmpty(patient.diagnoses)}">
+                            Нет диагнозов
+                        </span>
+            </td>
+            <td>
+                        <span th:if="${patient.medicalDataBatches != null and not #lists.isEmpty(patient.medicalDataBatches)}">
+                            <span th:each="batch, iterStat : ${patient.medicalDataBatches}">
+                                <span th:text="${batch.name}"></span>
+                                <span th:if="${!iterStat.last}">,</span>
+                            </span>
+                        </span>
+                <span th:if="${patient.medicalDataBatches == null or #lists.isEmpty(patient.medicalDataBatches)}">
+                            Нет батчей
+                        </span>
+            </td>
             <td>
                 <a th:href="@{/patients/{id}/edit(id=${patient.id})}" class="btn btn-sm btn-warning">Редактировать</a>
             </td>
         </tr>
-        <tr th:if="${patients.isEmpty()}">
+        <tr th:if="${#lists.isEmpty(patients)}">
             <td colspan="5">Пациенты не найдены.</td>
         </tr>
         </tbody>
@@ -138,5 +130,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/scripts.js"></script>
 </body>
 </html>

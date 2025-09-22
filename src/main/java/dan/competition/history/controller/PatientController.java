@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/patients")
@@ -50,16 +53,16 @@ public class PatientController {
 
     // Создание нового пациента
     @PostMapping
-    public String createPatient(@Valid @ModelAttribute("newPatient") PatientCreateDTO patientDto,
-                                BindingResult result,
-                                @RequestParam("zipFile") MultipartFile zipFile,
-                                Model model) throws IOException {
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> createPatient(@Valid @ModelAttribute("newPatient") PatientCreateDTO patientDto,
+                                                             BindingResult result,
+                                                             @RequestParam("zipFile") MultipartFile zipFile) {
+        log.info("Creating patient with DTO: {}", patientDto);
+        Map<String, Object> response = new HashMap<>();
         if (result.hasErrors()) {
-            model.addAttribute("patients", patientService.findAll());
-            model.addAttribute("diagnoses", diagnosisService.findAll());
-            model.addAttribute("errorMessage", "Пожалуйста, исправьте ошибки в форме");
-            log.warn(result.getAllErrors().toString());
-            return "patients/list";
+            log.warn("Validation errors: {}", result.getAllErrors());
+            response.put("message", "Пожалуйста, исправьте ошибки в форме: " + result.getAllErrors());
+            return ResponseEntity.badRequest().body(response);
         }
         try {
             if (!zipFile.isEmpty()) {
@@ -70,13 +73,12 @@ public class PatientController {
                 patientService.createPatient(patientDto);
             }
             log.info("Patient created successfully");
-            return "redirect:/patients";
+            response.put("message", "Пациент успешно создан");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error creating patient: {}", e.getMessage(), e);
-            model.addAttribute("errorMessage", "Ошибка при создании пациента: " + e.getMessage());
-            model.addAttribute("patients", patientService.findAll());
-            model.addAttribute("diagnoses", diagnosisService.findAll());
-            return "patients/list";
+            response.put("message", "Ошибка при создании пациента: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
