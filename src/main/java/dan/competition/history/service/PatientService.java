@@ -7,6 +7,7 @@ import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.entity.Patient;
 import dan.competition.history.model.PatientCreateDTO;
 import dan.competition.history.model.PatientViewDTO;
+import dan.competition.history.model.PatientViewShortDTO;
 import dan.competition.history.repository.MedicalDataBatchRepository;
 import dan.competition.history.repository.MedicalDataRepository;
 import dan.competition.history.repository.PatientRepository;
@@ -43,8 +44,12 @@ public class PatientService {
 
     private final ChildbirthResultCacheService childbirthResultCacheService;
 
-    public List<Patient> findAll() {
-        return patientRepository.findAll();
+    public List<PatientViewDTO> findAllDto() {
+        return patientRepository.findAll().stream().map(PatientViewDTO::new).toList();
+    }
+
+    public List<PatientViewShortDTO> findAllShortDto() {
+        return patientRepository.findAll().stream().map(PatientViewShortDTO::new).toList();
     }
 
     public Optional<Patient> findById(Long id) {
@@ -207,5 +212,9 @@ public class PatientService {
             double value = Double.parseDouble(parts[1].trim());
             map.put(time, value);
         }
+    }
+
+    public void deleteById(Long id) {
+        patientRepository.deleteById(id);
     }
 }

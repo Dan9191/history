@@ -19,3 +19,20 @@ body {
     justify-content: center;
     align-items: center;
 }
+.diagnoses-checkboxes {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #fff;
+}
+.diagnoses-checkboxes .form-check {
+    margin-bottom: 5px;
+}
+tr.normal-birth {
+    background-color: #1aa142 !important;
+}
+tr.hypoxia {
+    background-color: #617aa6 !important;
+}

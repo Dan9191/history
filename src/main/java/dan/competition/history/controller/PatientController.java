@@ -3,7 +3,6 @@ package dan.competition.history.controller;
 import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.model.PatientCreateDTO;
 import dan.competition.history.model.PatientViewDTO;
-import dan.competition.history.repository.PatientRepository;
 import dan.competition.history.service.DiagnosisService;
 import dan.competition.history.service.MedicalDataBatchService;
 import dan.competition.history.service.PatientService;
@@ -18,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,12 +39,11 @@ public class PatientController {
     private final PatientService patientService;
     private final DiagnosisService diagnosisService;
     private final MedicalDataBatchService medicalDataBatchService;
-    private final PatientRepository patientRepository;
 
     // Список пациентов
     @GetMapping
     public String listPatients(Model model) {
-        model.addAttribute("patients", patientService.findAll());
+        model.addAttribute("patients", patientService.findAllShortDto());
         model.addAttribute("newPatient", new PatientCreateDTO());
         model.addAttribute("diagnoses", diagnosisService.findAll());
         return "patients/list";
@@ -93,7 +91,7 @@ public class PatientController {
         } catch (Exception e) {
             log.error("Error viewing patient: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при просмотре пациента: " + e.getMessage());
-            model.addAttribute("patients", patientService.findAll());
+            model.addAttribute("patients", patientService.findAllShortDto());
             model.addAttribute("diagnoses", diagnosisService.findAll());
             return "patients/list";
         }
@@ -110,7 +108,7 @@ public class PatientController {
         } catch (Exception e) {
             log.error("Error editing patient: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при редактировании пациента: " + e.getMessage());
-            model.addAttribute("patients", patientService.findAll());
+            model.addAttribute("patients", patientService.findAllShortDto());
             model.addAttribute("diagnoses", diagnosisService.findAll());
             return "patients/list";
         }
@@ -150,5 +148,23 @@ public class PatientController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
         return new ResponseEntity<>(contents, headers, HttpStatus.OK);
+    }
+
+    // удаление пациента
+    @DeleteMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deletePatient(@PathVariable Long id) {
+        log.info("Deleting patient with ID: {}", id);
+        Map<String, Object> response = new HashMap<>();
+        try {
+            patientService.deleteById(id);
+            log.info("Patient deleted successfully");
+            response.put("message", "Пациент успешно удалён");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error deleting patient: {}", e.getMessage(), e);
+            response.put("message", "Ошибка при удалении пациента: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 }

@@ -13,63 +13,80 @@
     <a href="/diagnoses" class="btn btn-outline-primary">Диагнозы</a>
 </div>
 
-<!-- Форма создания пациента -->
+<!-- Кнопка для сворачиваемого блока -->
 <div class="patient-form">
-    <h4>Добавить нового пациента</h4>
-    <form id="patientForm" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="name" class="form-label">Имя пациента *</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="age" class="form-label">Возраст</label>
-            <input type="number" class="form-control" id="age" name="age">
-        </div>
-        <div class="mb-3">
-            <label for="ph" class="form-label">pH</label>
-            <input type="number" step="0.01" class="form-control" id="ph" name="ph">
-        </div>
-        <div class="mb-3">
-            <label for="co2" class="form-label">CO2</label>
-            <input type="number" step="0.01" class="form-control" id="co2" name="co2">
-        </div>
-        <div class="mb-3">
-            <label for="glu" class="form-label">Глюкоза</label>
-            <input type="number" step="0.01" class="form-control" id="glu" name="glu">
-        </div>
-        <div class="mb-3">
-            <label for="lac" class="form-label">Лактат</label>
-            <input type="number" step="0.01" class="form-control" id="lac" name="lac">
-        </div>
-        <div class="mb-3">
-            <label for="be" class="form-label">BE</label>
-            <input type="number" step="0.01" class="form-control" id="be" name="be">
-        </div>
-        <div class="mb-3">
-            <label for="childbirthResultId" class="form-label">Результат родов *</label>
-            <select class="form-control" id="childbirthResultId" name="childbirthResultId" required>
-                <option value="" disabled selected>Выберите результат</option>
-                <option th:each="result : ${T(dan.competition.history.model.ChildbirthResultEnum).values()}"
-                        th:value="${result.id}" th:text="${result.label}"></option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="diagnosesIds" class="form-label">Диагнозы *</label>
-            <select multiple class="form-control" id="diagnosesIds" name="diagnosesIds" required>
-                <option th:each="diagnosis : ${diagnoses}" th:value="${diagnosis.id}" th:text="${diagnosis.name}"></option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="zipFile" class="form-label">ZIP-архив с медицинскими данными</label>
-            <input type="file" class="form-control" id="zipFile" name="zipFile" accept=".zip">
-        </div>
-        <div class="mb-3">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-            <button type="submit" class="btn btn-primary">Сохранить пациента</button>
-        </div>
-        <div id="errorMessage" class="error"></div>
-        <div id="successMessage" class="success"></div>
-    </form>
+    <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#patientFormCollapse" aria-expanded="false" aria-controls="patientFormCollapse">
+        Добавить нового пациента
+    </button>
+</div>
+
+<!-- Сворачиваемый блок с формой -->
+<div class="collapse" id="patientFormCollapse">
+    <div class="card card-body">
+        <h4>Добавить нового пациента</h4>
+        <form id="patientForm" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="name" class="form-label">Имя пациента *</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="age" class="form-label">Возраст</label>
+                <input type="number" class="form-control" id="age" name="age">
+            </div>
+            <div class="mb-3">
+                <label for="ph" class="form-label">pH</label>
+                <input type="number" step="0.01" class="form-control" id="ph" name="ph">
+            </div>
+            <div class="mb-3">
+                <label for="co2" class="form-label">CO2</label>
+                <input type="number" step="0.01" class="form-control" id="co2" name="co2">
+            </div>
+            <div class="mb-3">
+                <label for="glu" class="form-label">Глюкоза</label>
+                <input type="number" step="0.01" class="form-control" id="glu" name="glu">
+            </div>
+            <div class="mb-3">
+                <label for="lac" class="form-label">Лактат</label>
+                <input type="number" step="0.01" class="form-control" id="lac" name="lac">
+            </div>
+            <div class="mb-3">
+                <label for="be" class="form-label">BE</label>
+                <input type="number" step="0.01" class="form-control" id="be" name="be">
+            </div>
+            <div class="mb-3">
+                <label for="childbirthResultId" class="form-label">Результат родов *</label>
+                <select class="form-control" id="childbirthResultId" name="childbirthResultId" required>
+                    <option value="" disabled selected>Выберите результат</option>
+                    <option th:each="result : ${T(dan.competition.history.model.ChildbirthResultEnum).values()}"
+                            th:value="${result.id}" th:text="${result.label}"></option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Диагнозы *</label>
+                <div class="diagnoses-checkboxes">
+                    <div th:each="diagnosis : ${diagnoses}" class="form-check">
+                        <input type="checkbox" class="form-check-input" name="diagnosesIds"
+                               th:value="${diagnosis.id}" th:id="'diagnosis-' + ${diagnosis.id}">
+                        <label class="form-check-label" th:for="'diagnosis-' + ${diagnosis.id}"
+                               th:text="${diagnosis.name}"></label>
+                    </div>
+                    <div th:if="${#lists.isEmpty(diagnoses)}" class="text-muted">
+                        Диагнозы не найдены
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="zipFile" class="form-label">ZIP-архив с медицинскими данными</label>
+                <input type="file" class="form-control" id="zipFile" name="zipFile" accept=".zip">
+            </div>
+            <div class="mb-3">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#patientFormCollapse">Закрыть</button>
+                <button type="submit" class="btn btn-primary">Сохранить пациента</button>
+            </div>
+            <div id="errorMessage" class="error"></div>
+            <div id="successMessage" class="success"></div>
+        </form>
+    </div>
 </div>
 
 <!-- Спиннер -->
@@ -93,33 +110,32 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="patient : ${patients}">
-            <td th:text="${patient.id}"></td>
+        <tr th:each="patient : ${patients}"
+            th:classappend="${patient.childbirthResultId == 1} ? 'income' : 'expense'">
+            <td><a th:href="@{/patients/{id}(id=${patient.id})}" th:text="${patient.id}"></a></td>
             <td th:text="${patient.name}"></td>
             <td>
-                        <span th:if="${patient.diagnoses != null and not #lists.isEmpty(patient.diagnoses)}">
-                            <span th:each="diagnosis, iterStat : ${patient.diagnoses}">
-                                <span th:text="${diagnosis.name}"></span>
-                                <span th:if="${!iterStat.last}">,</span>
-                            </span>
-                        </span>
+                <span th:if="${patient.diagnoses != null and not #lists.isEmpty(patient.diagnoses)}">
+                    <span th:each="diagnosis, iterStat : ${patient.diagnoses}">
+                        <span th:text="${diagnosis.name}"></span>
+                        <span th:if="${!iterStat.last}">,</span>
+                    </span>
+                </span>
                 <span th:if="${patient.diagnoses == null or #lists.isEmpty(patient.diagnoses)}">
                             Нет диагнозов
-                        </span>
+                </span>
             </td>
             <td>
-                        <span th:if="${patient.medicalDataBatches != null and not #lists.isEmpty(patient.medicalDataBatches)}">
-                            <span th:each="batch, iterStat : ${patient.medicalDataBatches}">
-                                <span th:text="${batch.name}"></span>
-                                <span th:if="${!iterStat.last}">,</span>
-                            </span>
-                        </span>
-                <span th:if="${patient.medicalDataBatches == null or #lists.isEmpty(patient.medicalDataBatches)}">
+                <span th:if="${patient.medicalDataBatchSize != null}">
+                    <span th:text="${patient.medicalDataBatchSize}"></span>
+                </span>
+                <span th:if="${patient.medicalDataBatchSize == null}">
                             Нет батчей
-                        </span>
+                </span>
             </td>
             <td>
                 <a th:href="@{/patients/{id}/edit(id=${patient.id})}" class="btn btn-sm btn-warning">Редактировать</a>
+                <button class="btn btn-sm btn-danger delete-patient" th:data-patient-id="${patient.id}">Удалить</button>
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(patients)}">
