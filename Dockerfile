@@ -1,5 +1,5 @@
 # образ java
-FROM eclipse-temurin:24-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine
 
 # рабочая директория в контейнере
 WORKDIR /app

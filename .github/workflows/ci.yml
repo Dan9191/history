@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '24'
+          java-version: '21'
 
       # Права на запуск gradlew
       - name: chmod for Gradle Wrapper
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '24'
+          java-version: '21'
 
       - name: chmod for Gradle Wrapper
         run: chmod +x ./gradlew
