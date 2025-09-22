@@ -22,6 +22,10 @@ public class DiagnosisService {
         return diagnosisRepository.findById(id);
     }
 
+    public List<Diagnosis> findByIds(List<Long> ids) {
+        return diagnosisRepository.findAllById(ids);
+    }
+
     public void save(Diagnosis diagnosis) {
         if (diagnosis.getImpact() == null || diagnosis.getImpact().trim().isEmpty()) {
             diagnosis.setImpact("1");

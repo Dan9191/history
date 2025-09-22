@@ -5,12 +5,13 @@ import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.entity.MedicalData;
 import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.entity.Patient;
-import dan.competition.history.model.DiagnosisDTO;
-import dan.competition.history.model.PatientDTO;
+import dan.competition.history.model.PatientCreateDTO;
+import dan.competition.history.model.PatientViewDTO;
 import dan.competition.history.repository.MedicalDataBatchRepository;
 import dan.competition.history.repository.PatientRepository;
 import dan.competition.history.service.cache.ChildbirthResultCacheService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,11 +29,14 @@ import java.util.zip.ZipInputStream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PatientService {
 
     private final PatientRepository patientRepository;
 
     private final MedicalDataBatchRepository medicalDataBatchRepository;
+
+    private final DiagnosisService diagnosisService;
 
     private final ChildbirthResultCacheService childbirthResultCacheService;
 
@@ -51,13 +55,18 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
-    public void createPatient(PatientDTO patientDto) {
+    public PatientCreateDTO findByIdAsDTO(long id) {
+        Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
+        return new PatientCreateDTO(patient);
+    }
+
+    public void createPatient(PatientCreateDTO patientDto) {
         doCreatePatient(patientDto);
     }
 
-    public Patient doCreatePatient(PatientDTO patientDto) {
-        ChildbirthResult childbirthResult = childbirthResultCacheService.findById(patientDto.getChildbirthResultEnum().getId());
-        List<Diagnosis> diagnoses = patientDto.getDiagnoses().stream().map(DiagnosisDTO::mapToDiagnosis).toList();
+    public Patient doCreatePatient(PatientCreateDTO patientDto) {
+        ChildbirthResult childbirthResult = childbirthResultCacheService.findById(patientDto.getChildbirthResultId());
+        List<Diagnosis> diagnoses = diagnosisService.findByIds(patientDto.getDiagnosesIds());
         Patient patient = new Patient();
         Optional.ofNullable(patientDto.getName()).ifPresent(patient::setName);
         Optional.ofNullable(patientDto.getAge()).ifPresent(patient::setAge);
@@ -74,12 +83,33 @@ public class PatientService {
         return patient;
     }
 
-    public PatientDTO findByIdAsDTO(Long id) {
+    public PatientCreateDTO findByIdAsDTO(Long id) {
         Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
-        return new PatientDTO(patient);
+        return new PatientCreateDTO(patient);
     }
 
-    public void createPatientWithZipFile(PatientDTO patientDTO, MultipartFile zipFile) throws IOException {
+    public PatientViewDTO findByIdAsViewDTO(Long id) {
+        Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
+        return new PatientViewDTO(patient);
+    }
+
+    public void updatePatient(Long id, PatientCreateDTO patientDto) {
+        Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
+        List<Diagnosis> diagnoses = diagnosisService.findByIds(patientDto.getDiagnosesIds());
+        patient.setName(patientDto.getName());
+        patient.setAge(patientDto.getAge());
+        patient.setPh(patientDto.getPh());
+        patient.setCo2(patientDto.getCo2());
+        patient.setGlu(patientDto.getGlu());
+        patient.setLac(patientDto.getLac());
+        patient.setBe(patientDto.getBe());
+        patient.setChildbirthResult(childbirthResultCacheService.findById(patientDto.getChildbirthResultId()));
+        patient.setDiagnoses(diagnoses);
+        save(patient);
+    }
+
+    public void createPatientWithZipFile(PatientCreateDTO patientDTO, MultipartFile zipFile) throws IOException {
+        log.info("started to createPatientWithZipFile");
         Patient patient = doCreatePatient(patientDTO);
 
         // Группировка файлов по префиксу из ZIP-архива
@@ -150,6 +180,8 @@ public class PatientService {
 
         // Сохранение пациента (каскадно сохранит батчи и данные)
         patientRepository.save(patient);
+
+        log.info("finished to createPatientWithZipFile");
     }
 
     private String readZipEntry(ZipInputStream zis) throws IOException {

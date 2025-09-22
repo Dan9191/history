@@ -1,8 +1,8 @@
 package dan.competition.history.controller;
 
 import dan.competition.history.entity.MedicalDataBatch;
-import dan.competition.history.entity.Patient;
-import dan.competition.history.model.PatientDTO;
+import dan.competition.history.model.PatientCreateDTO;
+import dan.competition.history.model.PatientViewDTO;
 import dan.competition.history.repository.PatientRepository;
 import dan.competition.history.service.DiagnosisService;
 import dan.competition.history.service.MedicalDataBatchService;
@@ -10,6 +10,7 @@ import dan.competition.history.service.PatientService;
 import dan.competition.history.util.PDFCreator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +31,7 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/patients")
 @RequiredArgsConstructor
+@Slf4j
 public class PatientController {
 
     private final PatientService patientService;
@@ -41,61 +43,97 @@ public class PatientController {
     @GetMapping
     public String listPatients(Model model) {
         model.addAttribute("patients", patientService.findAll());
-        model.addAttribute("newPatient", new PatientDTO());
+        model.addAttribute("newPatient", new PatientCreateDTO());
         model.addAttribute("diagnoses", diagnosisService.findAll());
         return "patients/list";
     }
 
     // Создание нового пациента
     @PostMapping
-    public String createPatient(@Valid @ModelAttribute("newPatient") PatientDTO patientDto,
+    public String createPatient(@Valid @ModelAttribute("newPatient") PatientCreateDTO patientDto,
                                 BindingResult result,
                                 @RequestParam("zipFile") MultipartFile zipFile,
                                 Model model) throws IOException {
         if (result.hasErrors()) {
             model.addAttribute("patients", patientService.findAll());
             model.addAttribute("diagnoses", diagnosisService.findAll());
+            model.addAttribute("errorMessage", "Пожалуйста, исправьте ошибки в форме");
+            log.warn(result.getAllErrors().toString());
             return "patients/list";
         }
-        if (!zipFile.isEmpty()) {
-            patientService.createPatientWithZipFile(patientDto, zipFile);
-        } else {
-            patientService.createPatient(patientDto);
+        try {
+            if (!zipFile.isEmpty()) {
+                log.info("Processing patient with zip file");
+                patientService.createPatientWithZipFile(patientDto, zipFile);
+            } else {
+                log.info("Processing patient without zip file");
+                patientService.createPatient(patientDto);
+            }
+            log.info("Patient created successfully");
+            return "redirect:/patients";
+        } catch (Exception e) {
+            log.error("Error creating patient: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Ошибка при создании пациента: " + e.getMessage());
+            model.addAttribute("patients", patientService.findAll());
+            model.addAttribute("diagnoses", diagnosisService.findAll());
+            return "patients/list";
         }
-        return "redirect:/patients";
     }
 
     // Детальная страница пациента
     @GetMapping("/{id}")
     public String viewPatient(@PathVariable Long id, Model model) {
-        PatientDTO patientDTO = patientService.findByIdAsDTO(id);
-        model.addAttribute("patient", patientDTO);
-        return "patients/details";
+        log.info("Viewing patient with ID: {}", id);
+        try {
+            PatientViewDTO patientViewDTO = patientService.findByIdAsViewDTO(id);
+            model.addAttribute("patient", patientViewDTO);
+            return "patients/details";
+        } catch (Exception e) {
+            log.error("Error viewing patient: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Ошибка при просмотре пациента: " + e.getMessage());
+            model.addAttribute("patients", patientService.findAll());
+            model.addAttribute("diagnoses", diagnosisService.findAll());
+            return "patients/list";
+        }
     }
 
-
-    // Страница редактирования пациента
     @GetMapping("/{id}/edit")
     public String editPatient(@PathVariable Long id, Model model) {
-        Patient patient = patientService.findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
-        model.addAttribute("patient", patient);
-        model.addAttribute("diagnoses", diagnosisService.findAll());
-        return "patients/edit";
+        log.info("Editing patient with ID: {}", id);
+        try {
+            PatientCreateDTO patientDTO = patientService.findByIdAsDTO(id);
+            model.addAttribute("patient", patientDTO);
+            model.addAttribute("diagnoses", diagnosisService.findAll());
+            return "patients/edit";
+        } catch (Exception e) {
+            log.error("Error editing patient: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Ошибка при редактировании пациента: " + e.getMessage());
+            model.addAttribute("patients", patientService.findAll());
+            model.addAttribute("diagnoses", diagnosisService.findAll());
+            return "patients/list";
+        }
     }
 
     // Сохранение изменений пациента
     @PostMapping("/{id}")
-    public String updatePatient(@PathVariable Long id,
-                                @Valid @ModelAttribute("patient") Patient patient,
-                                BindingResult result,
-                                Model model) {
+    public String updatePatient(@PathVariable Long id, @Valid @ModelAttribute("patient") PatientCreateDTO patientDTO, BindingResult result, Model model) {
+        log.info("Updating patient with ID: {}", id);
         if (result.hasErrors()) {
+            log.warn("Validation errors: {}", result.getAllErrors());
+            model.addAttribute("errorMessage", "Пожалуйста, исправьте ошибки в форме");
             model.addAttribute("diagnoses", diagnosisService.findAll());
             return "patients/edit";
         }
-        patient.setId(id);
-        patientService.save(patient);
-        return "redirect:/patients";
+        try {
+            patientService.updatePatient(id, patientDTO);
+            log.info("Patient updated successfully");
+            return "redirect:/patients";
+        } catch (Exception e) {
+            log.error("Error updating patient: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Ошибка при обновлении пациента: " + e.getMessage());
+            model.addAttribute("diagnoses", diagnosisService.findAll());
+            return "patients/edit";
+        }
     }
 
     // Экспорт батча в PDF
@@ -112,4 +150,3 @@ public class PatientController {
         return new ResponseEntity<>(contents, headers, HttpStatus.OK);
     }
 }
-//todo графики выводить согласно очереди

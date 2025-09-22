@@ -20,6 +20,6 @@ public class DiagnosisDTO {
         Optional.ofNullable(diagnosisDTO.getName()).ifPresent(diagnosis::setName);
         Optional.ofNullable(diagnosisDTO.getDescription()).ifPresent(diagnosis::setDescription);
         Optional.ofNullable(diagnosisDTO.getImpact()).ifPresent(diagnosis::setImpact);
-        return new Diagnosis();
+        return diagnosis;
     }
 }
