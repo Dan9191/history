@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const patientFormCollapse = document.getElementById('patientFormCollapse');
     const deleteButtons = document.querySelectorAll('.delete-patient');
 
+    // Получить CSRF-токен
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+    if (!csrfToken || !csrfHeader) {
+        console.error('CSRF token or header not found');
+        errorMessage.textContent = 'Ошибка: CSRF-токен не найден';
+        return;
+    }
+
     // Обработчик создания пациента
     form.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -14,11 +24,28 @@ document.addEventListener('DOMContentLoaded', function () {
         successMessage.textContent = '';
 
         const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            if (key === 'diagnoses') {
+                if (!data[key]) data[key] = [];
+                data[key].push(value);
+            } else if (key === 'file') {
+                // Пропускаем файл, так как он не обрабатывается в JSON
+            } else {
+                data[key] = value;
+            }
+        });
+
         fetch('/patients', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(data)
         })
             .then(response => {
+                spinnerOverlay.style.display = 'none';
                 if (!response.ok) {
                     return response.json().then(err => {
                         throw new Error(err.message || 'Ошибка при создании пациента');
@@ -27,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return response.json();
             })
             .then(data => {
-                spinnerOverlay.style.display = 'none';
                 successMessage.textContent = 'Пациент успешно создан!';
                 form.reset();
                 const collapseInstance = bootstrap.Collapse.getInstance(patientFormCollapse) || new bootstrap.Collapse(patientFormCollapse, { toggle: false });
@@ -47,9 +73,13 @@ document.addEventListener('DOMContentLoaded', function () {
             if (confirm('Вы уверены, что хотите удалить пациента?')) {
                 spinnerOverlay.style.display = 'flex';
                 fetch(`/patients/${patientId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
                 })
                     .then(response => {
+                        spinnerOverlay.style.display = 'none';
                         if (!response.ok) {
                             return response.json().then(err => {
                                 throw new Error(err.message || 'Ошибка при удалении пациента');
@@ -58,7 +88,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         return response.json();
                     })
                     .then(data => {
-                        spinnerOverlay.style.display = 'none';
                         alert('Пациент успешно удалён!');
                         window.location.reload();
                     })

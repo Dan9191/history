@@ -5,6 +5,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const diagnosisFormCollapse = document.getElementById('diagnosisFormCollapse');
     const deleteButtons = document.querySelectorAll('.delete-diagnosis');
 
+    // Получить CSRF-токен
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+    if (!csrfToken || !csrfHeader) {
+        console.error('CSRF token or header not found');
+        errorMessage.textContent = 'Ошибка: CSRF-токен не найден';
+        return;
+    }
+
     // Обработчик создания диагноза
     form.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -20,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch('/diagnoses', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
             },
             body: JSON.stringify(data)
         })
@@ -50,7 +61,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const diagnosisId = this.getAttribute('data-diagnosis-id');
             if (confirm('Вы уверены, что хотите удалить диагноз?')) {
                 fetch(`/diagnoses/${diagnosisId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
                 })
                     .then(response => {
                         if (!response.ok) {

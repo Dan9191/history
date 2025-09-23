@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
 <head>
     <meta charset="UTF-8">
     <title>Список диагнозов</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
 </head>
@@ -11,17 +13,19 @@
 <div class="nav-links">
     <h4>Навигация</h4>
     <a href="/patients" class="btn btn-outline-primary">Пациенты</a>
+    <a href="/logout" class="btn btn-outline-danger" sec:authorize="isAuthenticated()">Выйти</a>
 </div>
 
 <!-- Кнопка для сворачиваемого блока -->
-<div class="diagnosis-form">
-    <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#diagnosisFormCollapse" aria-expanded="false" aria-controls="diagnosisFormCollapse">
+<div class="diagnosis-form" sec:authorize="isAuthenticated()">
+    <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#diagnosisFormCollapse"
+            aria-expanded="false" aria-controls="diagnosisFormCollapse">
         Добавить новый диагноз
     </button>
 </div>
 
 <!-- Сворачиваемый блок с формой -->
-<div class="collapse" id="diagnosisFormCollapse">
+<div class="collapse" id="diagnosisFormCollapse" sec:authorize="isAuthenticated()">
     <div class="card card-body">
         <h4>Создать новый диагноз</h4>
         <form id="diagnosisForm">
@@ -38,7 +42,9 @@
                 <input type="text" class="form-control" id="impact" name="impact">
             </div>
             <div class="mb-3">
-                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#diagnosisFormCollapse">Закрыть</button>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
+                        data-bs-target="#diagnosisFormCollapse">Закрыть
+                </button>
                 <button type="submit" class="btn btn-primary">Сохранить диагноз</button>
             </div>
             <div id="errorMessage" class="error"></div>
@@ -66,8 +72,12 @@
             <td th:text="${diagnosis.name}"></td>
             <td th:text="${diagnosis.impact}"></td>
             <td>
-                <a th:href="@{/diagnoses/{id}/edit(id=${diagnosis.id})}" class="btn btn-sm btn-warning">Редактировать</a>
-                <button class="btn btn-sm btn-danger delete-diagnosis" th:data-diagnosis-id="${diagnosis.id}">Удалить</button>
+                <div sec:authorize="isAuthenticated()">
+                    <a th:href="@{/diagnoses/{id}/edit(id=${diagnosis.id})}" class="btn btn-sm btn-warning">Редактировать</a>
+                    <button class="btn btn-sm btn-danger delete-diagnosis" th:data-diagnosis-id="${diagnosis.id}">
+                        Удалить
+                    </button>
+                </div>
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(diagnoses)}">
