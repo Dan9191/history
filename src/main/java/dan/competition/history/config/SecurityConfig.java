@@ -1,5 +1,6 @@
 package dan.competition.history.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +16,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${security.admin.username}")
+    private String adminUsername;
+
+    @Value("${security.admin.password}")
+    private String adminPassword;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,9 +45,6 @@ public class SecurityConfig {
                 .exceptionHandling((exceptions) -> exceptions
                         .accessDeniedPage("/access-denied")
                 );
-//                .csrf(csrf -> csrf
-//                        .ignoringRequestMatchers("/patients/**", "/diagnoses/**")
-//                );
 
         return http.build();
     }
@@ -48,8 +52,8 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("password"))
+                .username(adminUsername)
+                .password(passwordEncoder().encode(adminPassword))
                 .roles("ADMIN")
                 .build();
 
