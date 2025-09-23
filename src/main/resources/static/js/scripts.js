@@ -24,25 +24,10 @@ document.addEventListener('DOMContentLoaded', function () {
         successMessage.textContent = '';
 
         const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            if (key === 'diagnoses') {
-                if (!data[key]) data[key] = [];
-                data[key].push(value);
-            } else if (key === 'file') {
-                // Пропускаем файл, так как он не обрабатывается в JSON
-            } else {
-                data[key] = value;
-            }
-        });
 
         fetch('/patients', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify(data)
+            body: formData
         })
             .then(response => {
                 spinnerOverlay.style.display = 'none';

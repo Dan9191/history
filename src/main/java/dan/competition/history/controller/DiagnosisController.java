@@ -3,6 +3,7 @@ package dan.competition.history.controller;
 import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.model.DiagnosisDTO;
 import dan.competition.history.service.DiagnosisService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -68,7 +69,8 @@ public class DiagnosisController {
     // детальная страница по диагнозу
     @GetMapping("/{id}")
     public String viewDiagnosis(@PathVariable Long id, Model model) {
-        Diagnosis diagnosis = diagnosisService.findById(id).orElseThrow(() -> new RuntimeException("Diagnosis not found"));
+        Diagnosis diagnosis = diagnosisService.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Diagnosis with ID " + id + " not found"));
         model.addAttribute("diagnosis", diagnosis);
         return "diagnoses/details";
     }
@@ -108,7 +110,3 @@ public class DiagnosisController {
         }
     }
 }
-
-//todo Обработки ошибок
-//todo реализация работы через dto
-//todo валидация данных при добавлении и удалении (нельзя создавать уже существующий диагноз, нельзя удалять диагноз, на который кто-то ссылается)

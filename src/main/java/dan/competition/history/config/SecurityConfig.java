@@ -21,7 +21,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/", "/login", "/patients", "/diagnoses", "/patients/{id:[0-9]+}",
-                                "/diagnoses/{id:[0-9]+}", "/css/**", "/js/**").permitAll()
+                                "/diagnoses/{id:[0-9]+}", "/css/**", "/js/**", "/error").permitAll()
                         .requestMatchers("/patients/**", "/diagnoses/**").authenticated()
                         .anyRequest().authenticated()
                 )

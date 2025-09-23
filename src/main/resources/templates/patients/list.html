@@ -28,6 +28,7 @@
     <div class="card card-body">
         <h4>Добавить нового пациента</h4>
         <form id="patientForm" enctype="multipart/form-data">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="mb-3">
                 <label for="name" class="form-label">Имя пациента *</label>
                 <input type="text" class="form-control" id="name" name="name" required>
@@ -116,7 +117,7 @@
         <tr th:each="patient : ${patients}"
             th:classappend="${patient.childbirthResultId == 1} ? 'income' : 'expense'">
             <td th:text="${patient.id}"></td>
-            <td th:text="${patient.name}"><a th:href="@{/patients/{id}(id=${patient.id})}" th:text="${patient.name}"></a></td>
+            <td><a th:href="@{/patients/{id}(id=${patient.id})}" th:text="${patient.name}"></a></td>
             <td>
                 <span th:if="${patient.diagnoses != null and not #lists.isEmpty(patient.diagnoses)}">
                     <span th:each="diagnosis, iterStat : ${patient.diagnoses}">

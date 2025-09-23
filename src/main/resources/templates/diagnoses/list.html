@@ -57,7 +57,7 @@
 <!--/*@thymesVar id="diagnosis" type="dan.competition.history.dto.DiagnosisDTO"*/-->
 <div class="diagnoses-table">
     <h4>Все диагнозы</h4>
-    <table class="table">
+    <table class="table table-striped">
         <thead>
         <tr>
             <th>ID</th>
@@ -69,7 +69,7 @@
         <tbody>
         <tr th:each="diagnosis : ${diagnoses}">
             <td th:text="${diagnosis.id}"></td>
-            <td th:text="${diagnosis.name}"></td>
+            <td><a th:href="@{/diagnoses/{id}(id=${diagnosis.id})}" th:text="${diagnosis.name}"></a></td>
             <td th:text="${diagnosis.impact}"></td>
             <td>
                 <div sec:authorize="isAuthenticated()">

@@ -1,8 +1,10 @@
 package dan.competition.history.controller;
 
+import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.model.PatientCreateDTO;
 import dan.competition.history.model.PatientViewDTO;
+import dan.competition.history.model.PatientViewShortDTO;
 import dan.competition.history.service.DiagnosisService;
 import dan.competition.history.service.MedicalDataBatchService;
 import dan.competition.history.service.PatientService;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,9 +46,11 @@ public class PatientController {
     // Список пациентов
     @GetMapping
     public String listPatients(Model model) {
-        model.addAttribute("patients", patientService.findAllShortDto());
+        model.addAttribute("patients",
+                patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientViewShortDTO::getName)).toList());
         model.addAttribute("newPatient", new PatientCreateDTO());
-        model.addAttribute("diagnoses", diagnosisService.findAll());
+        model.addAttribute("diagnoses",
+                diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
         return "patients/list";
     }
 
@@ -91,8 +96,8 @@ public class PatientController {
         } catch (Exception e) {
             log.error("Error viewing patient: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при просмотре пациента: " + e.getMessage());
-            model.addAttribute("patients", patientService.findAllShortDto());
-            model.addAttribute("diagnoses", diagnosisService.findAll());
+            model.addAttribute("patients", patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientViewShortDTO::getName)).toList());
+            model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/list";
         }
     }
@@ -103,13 +108,13 @@ public class PatientController {
         try {
             PatientCreateDTO patientDTO = patientService.findByIdAsDTO(id);
             model.addAttribute("patient", patientDTO);
-            model.addAttribute("diagnoses", diagnosisService.findAll());
+            model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/edit";
         } catch (Exception e) {
             log.error("Error editing patient: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при редактировании пациента: " + e.getMessage());
-            model.addAttribute("patients", patientService.findAllShortDto());
-            model.addAttribute("diagnoses", diagnosisService.findAll());
+            model.addAttribute("patients", patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientViewShortDTO::getName)).toList());
+            model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/list";
         }
     }
@@ -121,7 +126,7 @@ public class PatientController {
         if (result.hasErrors()) {
             log.warn("Validation errors: {}", result.getAllErrors());
             model.addAttribute("errorMessage", "Пожалуйста, исправьте ошибки в форме");
-            model.addAttribute("diagnoses", diagnosisService.findAll());
+            model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/edit";
         }
         try {
@@ -131,7 +136,7 @@ public class PatientController {
         } catch (Exception e) {
             log.error("Error updating patient: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при обновлении пациента: " + e.getMessage());
-            model.addAttribute("diagnoses", diagnosisService.findAll());
+            model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/edit";
         }
     }
