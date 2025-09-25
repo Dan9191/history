@@ -81,6 +81,7 @@ public class PatientService {
         Optional.ofNullable(patientDto.getBe()).ifPresent(patient::setBe);
         Optional.ofNullable(patientDto.getPh()).ifPresent(patient::setPh);
         Optional.ofNullable(patientDto.getGlu()).ifPresent(patient::setGlu);
+        Optional.ofNullable(patientDto.getCo2()).ifPresent(patient::setCo2);
         Optional.ofNullable(patientDto.getLac()).ifPresent(patient::setLac);
         Optional.ofNullable(childbirthResult).ifPresent(patient::setChildbirthResult);
         patient.setDiagnoses(diagnoses);
