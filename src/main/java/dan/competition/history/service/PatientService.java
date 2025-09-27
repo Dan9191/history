@@ -5,9 +5,10 @@ import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.entity.MedicalData;
 import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.entity.Patient;
-import dan.competition.history.model.PatientCreateDTO;
-import dan.competition.history.model.PatientViewDTO;
-import dan.competition.history.model.PatientViewShortDTO;
+import dan.competition.history.model.view.PatientCreateView;
+import dan.competition.history.model.view.PatientShortView;
+import dan.competition.history.model.websocket.PatientDataWebSocket;
+import dan.competition.history.model.view.PatientView;
 import dan.competition.history.repository.MedicalDataBatchRepository;
 import dan.competition.history.repository.MedicalDataRepository;
 import dan.competition.history.repository.PatientRepository;
@@ -44,12 +45,12 @@ public class PatientService {
 
     private final ChildbirthResultCacheService childbirthResultCacheService;
 
-    public List<PatientViewDTO> findAllDto() {
-        return patientRepository.findAll().stream().map(PatientViewDTO::new).toList();
+    public List<PatientView> findAllDto() {
+        return patientRepository.findAll().stream().map(PatientView::new).toList();
     }
 
-    public List<PatientViewShortDTO> findAllShortDto() {
-        return patientRepository.findAll().stream().map(PatientViewShortDTO::new).toList();
+    public List<PatientShortView> findAllShortDto() {
+        return patientRepository.findAll().stream().map(PatientShortView::new).toList();
     }
 
     public Optional<Patient> findById(Long id) {
@@ -63,16 +64,11 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
-    public PatientCreateDTO findByIdAsDTO(long id) {
-        Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
-        return new PatientCreateDTO(patient);
-    }
-
-    public void createPatient(PatientCreateDTO patientDto) {
+    public void createPatient(PatientCreateView patientDto) {
         doCreatePatient(patientDto);
     }
 
-    public Patient doCreatePatient(PatientCreateDTO patientDto) {
+    public Patient doCreatePatient(PatientCreateView patientDto) {
         ChildbirthResult childbirthResult = childbirthResultCacheService.findById(patientDto.getChildbirthResultId());
         List<Diagnosis> diagnoses = diagnosisService.findByIds(patientDto.getDiagnosesIds());
         Patient patient = new Patient();
@@ -92,17 +88,17 @@ public class PatientService {
         return patient;
     }
 
-    public PatientCreateDTO findByIdAsDTO(Long id) {
+    public PatientCreateView findByIdAsDTO(Long id) {
         Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
-        return new PatientCreateDTO(patient);
+        return new PatientCreateView(patient);
     }
 
-    public PatientViewDTO findByIdAsViewDTO(Long id) {
+    public PatientView findByIdAsViewDTO(Long id) {
         Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
-        return new PatientViewDTO(patient);
+        return new PatientView(patient);
     }
 
-    public void updatePatient(Long id, PatientCreateDTO patientDto) {
+    public void updatePatient(Long id, PatientCreateView patientDto) {
         Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
         List<Diagnosis> diagnoses = diagnosisService.findByIds(patientDto.getDiagnosesIds());
         patient.setName(patientDto.getName());
@@ -117,7 +113,7 @@ public class PatientService {
         save(patient);
     }
 
-    public void createPatientWithZipFile(PatientCreateDTO patientDTO, MultipartFile zipFile) throws IOException {
+    public void createPatientWithZipFile(PatientCreateView patientDTO, MultipartFile zipFile) throws IOException {
         log.info("started to createPatientWithZipFile");
         Patient patient = doCreatePatient(patientDTO);
 
@@ -217,5 +213,20 @@ public class PatientService {
 
     public void deleteById(Long id) {
         patientRepository.deleteById(id);
+    }
+
+    public PatientDataWebSocket getPatientData(Long patientId, Boolean status) {
+        return PatientDataWebSocket.builder()
+                .id(patientId)
+                .name("Patient-" + patientId)
+                .age(30) // Пример
+                .diagnoses(List.of("Example Diagnosis")) // Пример
+                .ph(null) // Некоторые поля null, как указано
+                .co2(null)
+                .glu(null)
+                .lac(null)
+                .be(null)
+                .status(status)
+                .build();
     }
 }

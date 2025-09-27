@@ -1,7 +1,8 @@
-package dan.competition.history.model;
+package dan.competition.history.model.view;
 
 import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.entity.Patient;
+import dan.competition.history.model.MedicalDataBatchDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +16,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PatientCreateDTO {
+public class PatientCreateView {
     private Long id;
     @NotBlank(message = "Имя пациента обязательно")
     private String name;
@@ -32,7 +33,7 @@ public class PatientCreateDTO {
     @NotNull(message = "Результат родов обязателен")
     private Integer childbirthResultId;
 
-    public PatientCreateDTO(Patient patient) {
+    public PatientCreateView(Patient patient) {
         List<Long> diagnosisDTOs = patient.getDiagnoses().stream()
                 .map(Diagnosis::getId)
                 .toList();
@@ -41,7 +42,7 @@ public class PatientCreateDTO {
                         b.getId(),
                         b.getName(),
                         b.getMedicalDataList().stream()
-                                .map(d -> new MedicalDataDTO(d.getId(), d.getTimeSec(), d.getUterus(), d.getBpm()))
+                                .map(d -> new MedicalDataView(d.getId(), d.getTimeSec(), d.getUterus(), d.getBpm()))
                                 .toList()
                 ))
                 .sorted(Comparator.comparing(MedicalDataBatchDTO::getName))

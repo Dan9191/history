@@ -1,5 +1,6 @@
 package dan.competition.history.model;
 
+import dan.competition.history.model.view.MedicalDataView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,5 +11,5 @@ import java.util.List;
 public class MedicalDataBatchDTO {
     private Long id;
     private String name;
-    private List<MedicalDataDTO> medicalDataList;
+    private List<MedicalDataView> medicalDataList;
 }

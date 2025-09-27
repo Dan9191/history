@@ -1,22 +1,26 @@
 package dan.competition.history.service;
 
-
+import dan.competition.history.entity.MedicalData;
 import dan.competition.history.entity.MedicalDataBatch;
-import dan.competition.history.entity.Patient;
+import dan.competition.history.repository.MedicalDataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MedicalDataBatchService {
 
-    private final PatientService patientService;
+    private final MedicalDataRepository medicalRepository;
 
-    public MedicalDataBatch getBatchByPatientIdAndBatchId(Long patientId, Long batchId) {
-        Patient patient = patientService.findById(patientId).orElseThrow(() -> new RuntimeException("Patient not found"));
-        return patient.getMedicalDataBatches().stream()
-                .filter(b -> b.getId().equals(batchId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Batch not found"));
+    public MedicalDataBatch getBatchByPatientIdAndBatchId(String batchName, Long batchId) {
+        List<MedicalData> medicalDataList = medicalRepository.findByMedicalDataBatchIdOrderByTimeSec(batchId);
+        MedicalDataBatch medicalDataBatch = new MedicalDataBatch();
+        medicalDataBatch.setId(batchId);
+        medicalDataBatch.setName(batchName);
+        medicalDataBatch.setMedicalDataList(medicalDataList);
+
+        return medicalDataBatch;
     }
 }

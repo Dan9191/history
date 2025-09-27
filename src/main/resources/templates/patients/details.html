@@ -83,7 +83,20 @@
                     <div class="chart-container">
                         <canvas th:id="'chart-' + ${batch.id}"></canvas>
                     </div>
-                    <a th:href="@{/patients/{patientId}/batches/{batchId}/pdf(patientId=${patient.id}, batchId=${batch.id})}" class="btn btn-sm btn-primary mt-2">Скачать данные в PDF</a>
+                    <a th:href="@{/patients/{batchName}/batches/{batchId}/pdf(batchName=${batch.name},batchId=${batch.id})}"
+                       class="btn btn-sm btn-primary mt-2"
+                       role="button">
+                        Скачать данные в PDF
+                    </a>
+
+                    <!-- Send Batch Form -->
+                    <form th:action="@{/patients/sendBatch/{patientId}/{batchId}(patientId=${patient.id},batchId=${batch.id})}"
+                          method="post"
+                          class="d-inline">
+                        <input type="hidden" th:value="${patient.id}" name="patientId"/>
+                        <input type="hidden" th:value="${batch.id}" name="batchId"/>
+                        <button type="submit" class="btn btn-sm btn-primary mt-2">Отправить батч</button>
+                    </form>
                 </div>
                 <span th:if="${#lists.isEmpty(patient.medicalDataBatches)}">
                         Батчи данных не найдены

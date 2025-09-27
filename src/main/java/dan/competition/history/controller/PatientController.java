@@ -2,9 +2,10 @@ package dan.competition.history.controller;
 
 import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.entity.MedicalDataBatch;
-import dan.competition.history.model.PatientCreateDTO;
-import dan.competition.history.model.PatientViewDTO;
-import dan.competition.history.model.PatientViewShortDTO;
+import dan.competition.history.model.view.PatientCreateView;
+import dan.competition.history.model.view.PatientShortView;
+import dan.competition.history.model.view.PatientView;
+import dan.competition.history.service.DataSenderService;
 import dan.competition.history.service.DiagnosisService;
 import dan.competition.history.service.MedicalDataBatchService;
 import dan.competition.history.service.PatientService;
@@ -43,12 +44,14 @@ public class PatientController {
     private final DiagnosisService diagnosisService;
     private final MedicalDataBatchService medicalDataBatchService;
 
+    private final DataSenderService dataSenderService;
+
     // Список пациентов
     @GetMapping
     public String listPatients(Model model) {
         model.addAttribute("patients",
-                patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientViewShortDTO::getName)).toList());
-        model.addAttribute("newPatient", new PatientCreateDTO());
+                patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientShortView::getName)).toList());
+        model.addAttribute("newPatient", new PatientCreateView());
         model.addAttribute("diagnoses",
                 diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
         return "patients/list";
@@ -57,7 +60,7 @@ public class PatientController {
     // Создание нового пациента
     @PostMapping
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> createPatient(@Valid @ModelAttribute("newPatient") PatientCreateDTO patientDto,
+    public ResponseEntity<Map<String, Object>> createPatient(@Valid @ModelAttribute("newPatient") PatientCreateView patientDto,
                                                              BindingResult result,
                                                              @RequestParam("zipFile") MultipartFile zipFile) {
         log.info("Creating patient with DTO: {}", patientDto);
@@ -90,13 +93,17 @@ public class PatientController {
     public String viewPatient(@PathVariable Long id, Model model) {
         log.info("Viewing patient with ID: {}", id);
         try {
-            PatientViewDTO patientViewDTO = patientService.findByIdAsViewDTO(id);
-            model.addAttribute("patient", patientViewDTO);
+            PatientView patientView = patientService.findByIdAsViewDTO(id);
+            model.addAttribute("patient", patientView);
             return "patients/details";
         } catch (Exception e) {
             log.error("Error viewing patient: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при просмотре пациента: " + e.getMessage());
-            model.addAttribute("patients", patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientViewShortDTO::getName)).toList());
+            model.addAttribute(
+                    "patients",
+                    patientService.findAllShortDto().stream()
+                            .sorted(Comparator.comparing(PatientShortView::getName)).toList()
+            );
             model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/list";
         }
@@ -106,14 +113,14 @@ public class PatientController {
     public String editPatient(@PathVariable Long id, Model model) {
         log.info("Editing patient with ID: {}", id);
         try {
-            PatientCreateDTO patientDTO = patientService.findByIdAsDTO(id);
+            PatientCreateView patientDTO = patientService.findByIdAsDTO(id);
             model.addAttribute("patient", patientDTO);
             model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/edit";
         } catch (Exception e) {
             log.error("Error editing patient: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при редактировании пациента: " + e.getMessage());
-            model.addAttribute("patients", patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientViewShortDTO::getName)).toList());
+            model.addAttribute("patients", patientService.findAllShortDto().stream().sorted(Comparator.comparing(PatientShortView::getName)).toList());
             model.addAttribute("diagnoses", diagnosisService.findAll().stream().sorted(Comparator.comparing(Diagnosis::getName)).toList());
             return "patients/list";
         }
@@ -121,7 +128,7 @@ public class PatientController {
 
     // Сохранение изменений пациента
     @PostMapping("/{id}")
-    public String updatePatient(@PathVariable Long id, @Valid @ModelAttribute("patient") PatientCreateDTO patientDTO, BindingResult result, Model model) {
+    public String updatePatient(@PathVariable Long id, @Valid @ModelAttribute("patient") PatientCreateView patientDTO, BindingResult result, Model model) {
         log.info("Updating patient with ID: {}", id);
         if (result.hasErrors()) {
             log.warn("Validation errors: {}", result.getAllErrors());
@@ -142,9 +149,9 @@ public class PatientController {
     }
 
     // Экспорт батча в PDF
-    @GetMapping("/{patientId}/batches/{batchId}/pdf")
-    public ResponseEntity<byte[]> exportBatchToPdf(@PathVariable Long patientId, @PathVariable Long batchId) {
-        MedicalDataBatch batch = medicalDataBatchService.getBatchByPatientIdAndBatchId(patientId, batchId);
+    @GetMapping("/{batchName}/batches/{batchId}/pdf")
+    public ResponseEntity<byte[]> exportBatchToPdf(@PathVariable String batchName, @PathVariable Long batchId) {
+        MedicalDataBatch batch = medicalDataBatchService.getBatchByPatientIdAndBatchId(batchName, batchId);
 
         byte[] contents = PDFCreator.createPDF(batch);
         HttpHeaders headers = new HttpHeaders();
@@ -171,5 +178,12 @@ public class PatientController {
             response.put("message", "Ошибка при удалении пациента: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+
+    @PostMapping("/sendBatch/{patientId}/{batchId}")
+    public String sendBatchToDevice(@PathVariable Long patientId, @PathVariable Long batchId) {
+        dataSenderService.sendBatchToDevice(patientId, batchId);
+        return "patients/details";
     }
 }

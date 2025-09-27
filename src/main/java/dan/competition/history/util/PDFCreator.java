@@ -9,7 +9,6 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import dan.competition.history.entity.MedicalDataBatch;
-import dan.competition.history.entity.Patient;
 
 import java.io.ByteArrayOutputStream;
 
