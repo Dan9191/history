@@ -30,9 +30,9 @@ public class DataSenderService {
         messagingTemplate.convertAndSend("/topic/patient", patientData);
         log.info("Sent PatientData with status=true: {}", patientData);
 
-        // 2. Ждем 5 секунд
+        // 2. Ждем 10 секунд
         try {
-            Thread.sleep(5000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             log.error("Interrupted during initial delay: {}", e.getMessage());
             Thread.currentThread().interrupt();
@@ -58,7 +58,7 @@ public class DataSenderService {
             );
 
             // Ждем, пока currentSec не достигнет timeSec текущего MedicalData
-            while (currentSec < medicalDataWebSocket.timeSec()) {
+            while (currentSec < medicalDataWebSocket.getTimeSec()) {
                 try {
                     Thread.sleep(100); // Увеличиваем время каждые 100 мс
                     currentSec += 0.1; // Увеличиваем на 0.1 секунды

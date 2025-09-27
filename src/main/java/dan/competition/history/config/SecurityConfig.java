@@ -26,11 +26,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**"))
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/", "/login", "/patients", "/diagnoses", "/patients/{id:[0-9]+}",
-                                "/diagnoses/{id:[0-9]+}", "/css/**", "/js/**", "/error").permitAll()
+                                "/diagnoses/{id:[0-9]+}", "/css/**", "/js/**", "/error", "/ws/**").permitAll()
                         .requestMatchers("/patients/**", "/diagnoses/**").authenticated()
-                        .anyRequest().authenticated()
+                        .anyRequest()
+                        .authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
