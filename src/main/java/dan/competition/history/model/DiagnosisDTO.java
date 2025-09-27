@@ -22,4 +22,11 @@ public class DiagnosisDTO {
         Optional.ofNullable(diagnosisDTO.getImpact()).ifPresent(diagnosis::setImpact);
         return diagnosis;
     }
+
+    public DiagnosisDTO(Diagnosis diagnosis) {
+        this.id = diagnosis.getId();
+        this.name = diagnosis.getName();
+        this.description = diagnosis.getDescription();
+        this.impact = diagnosis.getImpact();
+    }
 }

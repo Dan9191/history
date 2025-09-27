@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 @RequestMapping("/patients")
@@ -182,8 +183,24 @@ public class PatientController {
 
 
     @PostMapping("/sendBatch/{patientId}/{batchId}")
-    public String sendBatchToDevice(@PathVariable Long patientId, @PathVariable Long batchId) {
-        dataSenderService.sendBatchToDevice(patientId, batchId);
-        return "patients/details";
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendBatchToDevice(@PathVariable Long patientId, @PathVariable Long batchId) {
+        log.info("Initiating async batch send for patientId: {}, batchId: {}", patientId, batchId);
+        Map<String, Object> response = new HashMap<>();
+
+        // Запускаем асинхронную задачу
+        CompletableFuture.runAsync(() -> {
+            try {
+                dataSenderService.sendBatchToDevice(patientId, batchId);
+                log.info("Batch sent successfully for patientId: {}, batchId: {}", patientId, batchId);
+            } catch (Exception e) {
+                log.error("Error sending batch for patientId: {}, batchId: {}, error: {}",
+                        patientId, batchId, e.getMessage(), e);
+            }
+        });
+
+        // Возвращаем немедленный ответ
+        response.put("message", "Запрос на отправку батча принят");
+        return ResponseEntity.ok(response);
     }
 }

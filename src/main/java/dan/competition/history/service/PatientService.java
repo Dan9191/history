@@ -5,6 +5,9 @@ import dan.competition.history.entity.Diagnosis;
 import dan.competition.history.entity.MedicalData;
 import dan.competition.history.entity.MedicalDataBatch;
 import dan.competition.history.entity.Patient;
+import dan.competition.history.model.DiagnosisDTO;
+import dan.competition.history.model.MedicalDataBatchDTO;
+import dan.competition.history.model.view.MedicalDataView;
 import dan.competition.history.model.view.PatientCreateView;
 import dan.competition.history.model.view.PatientShortView;
 import dan.competition.history.model.websocket.PatientDataWebSocket;
@@ -93,9 +96,40 @@ public class PatientService {
         return new PatientCreateView(patient);
     }
 
-    public PatientView findByIdAsViewDTO(Long id) {
-        Patient patient = findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
-        return new PatientView(patient);
+    public PatientView findByIdAsViewDTO(Long patientId) {
+
+        Map<String, Object> findPatientMapById = patientRepository.findPatientMapById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        List<MedicalDataBatchDTO> medicalDataBatchDTOS =
+                medicalDataBatchRepository.findIdAndNameByPatientIdSimpleOrderByNameAsc(patientId).stream()
+                        .map(arr -> new MedicalDataBatchDTO((Long)arr[0], (String)arr[1]))
+                        .toList();
+        medicalDataBatchDTOS.forEach(batch -> {
+            List<MedicalDataView> medicalDataList =
+                    medicalDataRepository.findByMedicalDataBatchIdOrderByTimeSec(batch.getId()).stream()
+                    .map(MedicalDataView::new)
+                    .toList();
+            batch.setMedicalDataList(medicalDataList);
+        });
+
+        List<DiagnosisDTO> diagnoses = diagnosisService.findByPatientId(patientId).stream()
+                .map(DiagnosisDTO::new)
+                .toList();
+
+        return PatientView.builder()
+                .id((Long) findPatientMapById.get("id"))
+                .name((String)findPatientMapById.get("name"))
+                .age((Integer)findPatientMapById.get("age"))
+                .ph((Float)findPatientMapById.get("ph"))
+                .co2((Float)findPatientMapById.get("co2"))
+                .glu((Float)findPatientMapById.get("glu"))
+                .lac((Float)findPatientMapById.get("lac"))
+                .be((Float)findPatientMapById.get("be"))
+                .childbirthResultId((Integer)findPatientMapById.get("childbirthResultId"))
+                .medicalDataBatches(medicalDataBatchDTOS)
+                .diagnoses(diagnoses)
+                .build();
     }
 
     public void updatePatient(Long id, PatientCreateView patientDto) {
@@ -215,6 +249,8 @@ public class PatientService {
         patientRepository.deleteById(id);
     }
 
+
+    // wtf
     public PatientDataWebSocket getPatientData(Long patientId, Boolean status) {
         return PatientDataWebSocket.builder()
                 .id(patientId)

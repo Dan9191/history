@@ -4,6 +4,7 @@ import dan.competition.history.entity.Patient;
 import dan.competition.history.model.DiagnosisDTO;
 import dan.competition.history.model.MedicalDataBatchDTO;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PatientView {
     private Long id;
     private String name;
