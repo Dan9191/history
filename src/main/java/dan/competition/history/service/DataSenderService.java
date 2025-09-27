@@ -22,11 +22,11 @@ public class DataSenderService {
     private final PatientService patientService;
 
     @Async
-    public void sendBatchToDevice(Long patientId, Long batchId) {
+    public synchronized void sendBatchToDevice(Long patientId, Long batchId) {
         log.info("Starting batch sending for patientId: {}, batchId: {}", patientId, batchId);
 
         // 1. Отправляем PatientData с status=true
-        PatientDataWebSocket patientData = patientService.getPatientData(patientId, true);
+        PatientDataWebSocket patientData = patientService.getPatientDataWebSocket(patientId, true);
         messagingTemplate.convertAndSend("/topic/patient", patientData);
         log.info("Sent PatientData with status=true: {}", patientData);
 
@@ -43,7 +43,7 @@ public class DataSenderService {
         List<MedicalData> medicalDataList = medicalDataRepository.findByMedicalDataBatchIdOrderByTimeSec(batchId);
         if (medicalDataList.isEmpty()) {
             log.warn("No MedicalData found for batchId: {}", batchId);
-            sendPatientDataWithStatusFalse(patientId);
+            sendPatientDataWithStatusFalse(patientData);
             return;
         }
 
@@ -84,11 +84,11 @@ public class DataSenderService {
         }
 
         // 7. Отправляем PatientData с status=false
-        sendPatientDataWithStatusFalse(patientId);
+        sendPatientDataWithStatusFalse(patientData);
     }
 
-    private void sendPatientDataWithStatusFalse(Long patientId) {
-        PatientDataWebSocket patientData = patientService.getPatientData(patientId, false);
+    private void sendPatientDataWithStatusFalse(PatientDataWebSocket patientData) {
+        patientData.setStatus(false);
         messagingTemplate.convertAndSend("/topic/patient", patientData);
         log.info("Sent PatientData with status=false: {}", patientData);
     }

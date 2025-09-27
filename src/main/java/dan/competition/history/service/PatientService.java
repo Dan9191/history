@@ -97,7 +97,6 @@ public class PatientService {
     }
 
     public PatientView findByIdAsViewDTO(Long patientId) {
-
         Map<String, Object> findPatientMapById = patientRepository.findPatientMapById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
@@ -251,17 +250,23 @@ public class PatientService {
 
 
     // wtf
-    public PatientDataWebSocket getPatientData(Long patientId, Boolean status) {
+    public PatientDataWebSocket getPatientDataWebSocket(Long patientId, Boolean status) {
+        Map<String, Object> findPatientMapById = patientRepository.findPatientMapById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        List<String> diagnoses = diagnosisService.findByPatientId(patientId).stream()
+                .map(Diagnosis::getName)
+                .toList();
+
         return PatientDataWebSocket.builder()
-                .id(patientId)
-                .name("Patient-" + patientId)
-                .age(30) // Пример
-                .diagnoses(List.of("Example Diagnosis")) // Пример
-                .ph(null) // Некоторые поля null, как указано
-                .co2(null)
-                .glu(null)
-                .lac(null)
-                .be(null)
+                .diagnoses(diagnoses)
+                .id((Long) findPatientMapById.get("id"))
+                .name((String)findPatientMapById.get("name"))
+                .age((Integer)findPatientMapById.get("age"))
+                .ph((Float)findPatientMapById.get("ph"))
+                .co2((Float)findPatientMapById.get("co2"))
+                .glu((Float)findPatientMapById.get("glu"))
+                .lac((Float)findPatientMapById.get("lac"))
+                .be((Float)findPatientMapById.get("be"))
                 .status(status)
                 .build();
     }
