@@ -28,7 +28,7 @@ public class DataSenderService {
         // 1. Отправляем PatientData с status=true
         PatientDataWebSocket patientData = patientService.getPatientDataWebSocket(patientId, true);
         messagingTemplate.convertAndSend("/topic/patient", patientData);
-        log.info("Sent PatientData with status=true: {}", patientData);
+        log.debug("Sent PatientData with status=true: {}", patientData);
 
         // 2. Ждем 10 секунд
         try {
@@ -71,7 +71,7 @@ public class DataSenderService {
 
             // Отправляем MedicalData
             messagingTemplate.convertAndSend("/topic/data", medicalDataWebSocket);
-            log.info("Sent MedicalData: {}", medicalDataWebSocket);
+            log.debug("Sent MedicalData: {}", medicalDataWebSocket);
         }
 
         // 6. Ждем 5 секунд после последнего medicalDataWebSocket
@@ -90,6 +90,6 @@ public class DataSenderService {
     private void sendPatientDataWithStatusFalse(PatientDataWebSocket patientData) {
         patientData.setStatus(false);
         messagingTemplate.convertAndSend("/topic/patient", patientData);
-        log.info("Sent PatientData with status=false: {}", patientData);
+        log.debug("Sent PatientData with status=false: {}", patientData);
     }
 }
