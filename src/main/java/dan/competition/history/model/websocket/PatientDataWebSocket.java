@@ -1,5 +1,6 @@
 package dan.competition.history.model.websocket;
 
+import dan.competition.history.model.DiagnosisDTO;
 import lombok.Builder;
 import lombok.Data;
 
@@ -40,7 +41,7 @@ public class PatientDataWebSocket {
      */
     private Float be;
 
-    private List<String> diagnoses;
+    private List<DiagnosisDTO> diagnoses;
 
     private Boolean status;
 }

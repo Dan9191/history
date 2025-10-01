@@ -253,8 +253,9 @@ public class PatientService {
     public PatientDataWebSocket getPatientDataWebSocket(Long patientId, Boolean status) {
         Map<String, Object> findPatientMapById = patientRepository.findPatientMapById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-        List<String> diagnoses = diagnosisService.findByPatientId(patientId).stream()
-                .map(Diagnosis::getName)
+
+        List<DiagnosisDTO> diagnoses = diagnosisService.findByPatientId(patientId).stream()
+                .map(DiagnosisDTO::new)
                 .toList();
 
         return PatientDataWebSocket.builder()
