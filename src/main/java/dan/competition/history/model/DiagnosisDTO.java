@@ -3,11 +3,13 @@ package dan.competition.history.model;
 import dan.competition.history.entity.Diagnosis;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Optional;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class DiagnosisDTO {
     private Long id;
     private String name;
